@@ -24,6 +24,11 @@ document.addEventListener('deviceready', onDeviceReady, false);
 function onDeviceReady() {
     // Cordova is now initialized. Have fun!
 
+    var p = document.querySelector('#device p');
+    p.innerHTML = device.cordova;
+
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
     document.getElementById('deviceready').classList.add('ready');
+
+    navigator.vibrate(3000);
 }

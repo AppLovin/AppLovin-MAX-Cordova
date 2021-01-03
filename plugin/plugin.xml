@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-applovin-max" version="1.0.0">
+    <name>AppLovin MAX</name>
+    <description>AppLovin MAX Cordova Plugin</description>
+    <license>MIT</license>
+    <keywords>applovin,max</keywords>
+    <repo>https://github.com/AppLovin/AppLovin-MAX-Cordova</repo>
+    <issue>https://github.com/AppLovin/AppLovin-MAX-Cordova/issues</issue>
+
+    <js-module src="www/applovinmax.js" name="AppLovinMAX">
+        <!-- module.exports gets inserted into the `window` object as window.applovin -->
+        <clobbers target="applovin" />
+    </js-module>
+
+    <!-- android -->
+    <platform name="android">
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="AppLovinMAX" >
+                <param name="android-package" value="com.applovin.reactnative.AppLovinMAX"/>
+            </feature>
+        </config-file>
+
+        <source-file src="src/android/AppLovinMAX.java" target-dir="src/com/applovin/cordova" />
+    </platform>
+
+    <!-- ios -->
+    <platform name="ios">
+        <config-file target="config.xml" parent="/*">
+            <feature name="AppLovinMAX">
+                <param name="ios-package" value="AppLovinMAX"/>
+            </feature>
+        </config-file>
+
+        <header-file src="src/ios/AppLovinMAX.h" />
+        <source-file src="src/ios/AppLovinMAX.m" />
+    </platform>
+
+</plugin>
