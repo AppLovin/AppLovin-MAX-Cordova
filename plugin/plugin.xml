@@ -22,6 +22,8 @@
         </config-file>
 
         <source-file src="src/android/AppLovinMAX.java" target-dir="src/com/applovin/cordova" />
+        
+        <framework src="com.applovin:applovin-sdk:+" />
     </platform>
 
     <!-- ios -->
