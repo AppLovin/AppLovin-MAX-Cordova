@@ -25,7 +25,7 @@
 @end
 
 @interface NSString (ALUtils)
-@property (assign, readonly, getter=al_isValidString) BOOL al_validString;
+@property (nonatomic, assign, readonly, getter=al_isValidString) BOOL al_validString;
 @end
 
 @interface AppLovinMAX()<MAAdDelegate, MAAdViewAdDelegate, MARewardedAdDelegate>
@@ -106,7 +106,7 @@ static NSString *const TAG = @"AppLovinMAX";
     // Guard against running init logic multiple times
     if ( [self isPluginInitialized] )
     {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
                                                 messageAsDictionary: @{@"consentDialogState" : @(self.sdk.configuration.consentDialogState)}];
         [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
         
@@ -197,7 +197,7 @@ static NSString *const TAG = @"AppLovinMAX";
 
 - (void/*BOOL*/)getConsentDialogState:(CDVInvokedUrlCommand *)command
 {
-    if ( [self isInitialized: nil] )
+    if ( ![self isInitialized: nil] )
     {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
                                                  messageAsNSInteger: ALConsentDialogStateUnknown];
@@ -587,7 +587,7 @@ static NSString *const TAG = @"AppLovinMAX";
         self.adInfoDict[ad.adUnitIdentifier] = ad;
     }
     
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
 }
 
 - (void)didFailToLoadAdForAdUnitIdentifier:(NSString *)adUnitIdentifier withErrorCode:(NSInteger)errorCode
@@ -623,8 +623,8 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     NSString *errorCodeStr = [@(errorCode) stringValue];
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : adUnitIdentifier,
-                                                 @"errorCode" : errorCodeStr}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : adUnitIdentifier,
+                                                @"errorCode" : errorCodeStr}];
 }
 
 - (void)didClickAd:(MAAd *)ad
@@ -653,7 +653,7 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
 }
 
 - (void)didDisplayAd:(MAAd *)ad
@@ -672,7 +672,7 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdDisplayedEvent";
     }
     
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
 }
 
 - (void)didFailToDisplayAd:(MAAd *)ad withErrorCode:(NSInteger)errorCode
@@ -692,8 +692,8 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     NSString *errorCodeStr = [@(errorCode) stringValue];
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                 @"errorCode" : errorCodeStr}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"errorCode" : errorCodeStr}];
 }
 
 - (void)didHideAd:(MAAd *)ad
@@ -712,20 +712,7 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdHiddenEvent";
     }
     
-    [self sendCordovaEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
-}
-
-- (void)didCollapseAd:(MAAd *)ad
-{
-    MAAdFormat *adFormat = ad.format;
-    if ( adFormat != MAAdFormat.banner && adFormat != MAAdFormat.leader && adFormat != MAAdFormat.mrec )
-    {
-        [self logInvalidAdFormat: adFormat];
-        return;
-    }
-    
-    [self sendCordovaEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdCollapsedEvent" : @"OnBannerAdCollapsedEvent"
-                              body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
 }
 
 - (void)didExpandAd:(MAAd *)ad
@@ -737,8 +724,21 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    [self sendCordovaEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdExpandedEvent" : @"OnBannerAdExpandedEvent"
-                              body: @{@"adUnitId": ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdExpandedEvent" : @"OnBannerAdExpandedEvent"
+                             body: @{@"adUnitId": ad.adUnitIdentifier}];
+}
+
+- (void)didCollapseAd:(MAAd *)ad
+{
+    MAAdFormat *adFormat = ad.format;
+    if ( adFormat != MAAdFormat.banner && adFormat != MAAdFormat.leader && adFormat != MAAdFormat.mrec )
+    {
+        [self logInvalidAdFormat: adFormat];
+        return;
+    }
+    
+    [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdCollapsedEvent" : @"OnBannerAdCollapsedEvent"
+                             body: @{@"adUnitId" : ad.adUnitIdentifier}];
 }
 
 - (void)didCompleteRewardedVideoForAd:(MAAd *)ad
@@ -764,9 +764,9 @@ static NSString *const TAG = @"AppLovinMAX";
     NSInteger rewardAmountInt = reward ? reward.amount : 0;
     NSString *rewardAmount = [@(rewardAmountInt) stringValue];
     
-    [self sendCordovaEventWithName: @"OnRewardedAdReceivedRewardEvent" body: @{@"adUnitId": ad.adUnitIdentifier,
-                                                                               @"rewardLabel": rewardLabel,
-                                                                               @"rewardAmount": rewardAmount}];
+    [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: @{@"adUnitId": ad.adUnitIdentifier,
+                                                                              @"rewardLabel": rewardLabel,
+                                                                              @"rewardAmount": rewardAmount}];
 }
 
 #pragma mark - Internal Methods
@@ -1147,7 +1147,7 @@ static NSString *const TAG = @"AppLovinMAX";
 
 #pragma mark - Cordova Event Bridge (via window)
 
-- (void)sendCordovaEventWithName:(NSString *)name body:(NSDictionary<NSString *, id> *)body
+- (void)fireWindowEventWithName:(NSString *)name body:(NSDictionary<NSString *, id> *)body
 {
     NSError *error = nil;
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject: body options: 0 error: &error];
