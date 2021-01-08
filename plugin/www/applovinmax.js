@@ -62,7 +62,6 @@ var AppLovinMAX = {
     isAgeRestrictedUserValue: null,
     isDoNotSellValue: null,
     isTabletValue: null,
-    isMutedValue: false,
     isAdReadyValues: {},
 
     initialize: function (sdkKey, callback) {
@@ -137,12 +136,7 @@ var AppLovinMAX = {
     },
 
     setMuted: function (muted) {
-        this.isMutedValue = muted;
         callNative('setMuted', [muted]);
-    },
-
-    isMuted: function () {
-        return this.isMutedValue;
     },
 
     setVerboseLogging: function (verboseLoggingEnabled) {
@@ -208,7 +202,7 @@ var AppLovinMAX = {
     /*-------*/
 
     createMRec: function (adUnitId, mrecPosition) {
-        callNative('createMRec', [adUnitId, bannerPosition]);
+        callNative('createMRec', [adUnitId, mrecPosition]);
     },
 
     setMRecBackgroundColor: function (adUnitId, hexColorCode) {

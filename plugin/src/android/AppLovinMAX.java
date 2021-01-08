@@ -82,9 +82,6 @@ public class AppLovinMAX
     private final Map<String, MaxAdFormat> mVerticalAdViewFormats      = new HashMap<>( 2 );
     private final List<String>             mAdUnitIdsToShowAfterCreate = new ArrayList<>( 2 );
 
-    private final Map<String, MaxAd> mAdInfoMap     = new HashMap<>();
-    private final Object             mAdInfoMapLock = new Object();
-
     private Activity getCurrentActivity() { return cordova.getActivity(); }
 
     public AppLovinMAX() { }
@@ -106,11 +103,7 @@ public class AppLovinMAX
         // Guard against running init logic multiple times
         if ( isPluginInitialized )
         {
-            JSONObject message = new JSONObject();
-            message.put( "consentDialogState", sdk.getConfiguration().getConsentDialogState().ordinal() );
-
-            callbackContext.success( message );
-
+            callbackContext.success( getInitializationMessage( context ) );
             return;
         }
 
@@ -146,6 +139,28 @@ public class AppLovinMAX
         sdk = AppLovinSdk.getInstance( sdkKey, new AppLovinSdkSettings( context ), currentActivity );
         sdk.setPluginVersion( "Cordova-" + pluginVersion );
         sdk.setMediationProvider( AppLovinMediationProvider.MAX );
+
+        // Set user id if needed
+        if ( !TextUtils.isEmpty( userIdToSet ) )
+        {
+            sdk.setUserIdentifier( userIdToSet );
+            userIdToSet = null;
+        }
+
+        // Set test device ids if needed
+        if ( testDeviceAdvertisingIdsToSet != null )
+        {
+            sdk.getSettings().setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsToSet );
+            testDeviceAdvertisingIdsToSet = null;
+        }
+
+        // Set verbose logging state if needed
+        if ( verboseLoggingToSet != null )
+        {
+            sdk.getSettings().setVerboseLogging( verboseLoggingToSet );
+            verboseLoggingToSet = null;
+        }
+
         sdk.initializeSdk( new AppLovinSdk.SdkInitializationListener()
         {
             @Override
@@ -155,27 +170,6 @@ public class AppLovinMAX
 
                 sdkConfiguration = configuration;
                 isSdkInitialized = true;
-
-                // Set user id if needed
-                if ( !TextUtils.isEmpty( userIdToSet ) )
-                {
-                    sdk.setUserIdentifier( userIdToSet );
-                    userIdToSet = null;
-                }
-
-                // Set test device ids if needed
-                if ( testDeviceAdvertisingIdsToSet != null )
-                {
-                    sdk.getSettings().setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsToSet );
-                    testDeviceAdvertisingIdsToSet = null;
-                }
-
-                // Set verbose logging state if needed
-                if ( verboseLoggingToSet != null )
-                {
-                    sdk.getSettings().setVerboseLogging( verboseLoggingToSet );
-                    verboseLoggingToSet = null;
-                }
 
                 // Enable orientation change listener, so that the position can be updated for vertical banners.
                 new OrientationEventListener( getCurrentActivity() )
@@ -192,37 +186,40 @@ public class AppLovinMAX
 
                 try
                 {
-                    JSONObject message = new JSONObject();
-                    message.put( "consentDialogState", configuration.getConsentDialogState().ordinal() );
-
-                    callbackContext.success( message );
+                    callbackContext.success( getInitializationMessage( context ) );
                 }
                 catch ( Throwable ignored ) {}
             }
         } );
     }
 
-    public boolean isInitialized(final CallbackContext callbackContext)
+    private JSONObject getInitializationMessage(final Context context) throws JSONException
     {
-        boolean isInitialized = isPluginInitialized && isSdkInitialized;
+        JSONObject message = new JSONObject();
 
-        // If called from JS
-        if ( callbackContext != null )
+        if ( sdkConfiguration != null )
         {
-            callbackContext.sendPluginResult( new PluginResult( OK, isInitialized ) );
+            message.put( "consentDialogState", sdkConfiguration.getConsentDialogState().ordinal() );
+        }
+        else
+        {
+            message.put( "consentDialogState", AppLovinSdkConfiguration.ConsentDialogState.UNKNOWN.ordinal() );
         }
 
-        // Called from this plugin
-        return isInitialized;
+        message.put( "hasUserConsent", AppLovinPrivacySettings.hasUserConsent( context ) );
+        message.put( "isAgeRestrictedUser", AppLovinPrivacySettings.isAgeRestrictedUser( context ) );
+        message.put( "isDoNotSell", AppLovinPrivacySettings.isDoNotSell( context ) );
+        message.put( "isTablet", AppLovinSdkUtils.isTablet( context ) );
+
+        return message;
+    }
+
+    private boolean isInitialized()
+    {
+        return isPluginInitialized && isSdkInitialized;
     }
 
     // General Public API
-
-    public void isTablet(final CallbackContext callbackContext)
-    {
-        Context contextToUse = ( getCurrentActivity() != null ) ? getCurrentActivity() : cordova.getContext();
-        callbackContext.sendPluginResult( new PluginResult( OK, AppLovinSdkUtils.isTablet( contextToUse ) ) );
-    }
 
     public void showMediationDebugger(final CallbackContext callbackContext)
     {
@@ -239,7 +236,7 @@ public class AppLovinMAX
 
     public void getConsentDialogState(final CallbackContext callbackContext)
     {
-        if ( !isInitialized( null ) )
+        if ( !isInitialized() )
         {
             PluginResult result = new PluginResult( OK, AppLovinSdkConfiguration.ConsentDialogState.UNKNOWN.ordinal() );
             callbackContext.sendPluginResult( result );
@@ -289,7 +286,7 @@ public class AppLovinMAX
 
     public void setUserId(final String userId, final CallbackContext callbackContext)
     {
-        if ( sdk != null )
+        if ( isPluginInitialized )
         {
             sdk.setUserIdentifier( userId );
             userIdToSet = null;
@@ -304,7 +301,7 @@ public class AppLovinMAX
 
     public void setMuted(final boolean muted, final CallbackContext callbackContext)
     {
-        if ( !isInitialized( null ) )
+        if ( !isPluginInitialized )
         {
             callbackContext.sendPluginResult( new PluginResult( ERROR ) );
             return;
@@ -315,21 +312,9 @@ public class AppLovinMAX
         callbackContext.success();
     }
 
-    public void isMuted(final CallbackContext callbackContext)
-    {
-        if ( !isInitialized( null ) )
-        {
-            callbackContext.sendPluginResult( new PluginResult( ERROR, sdk.getSettings().isMuted() ) );
-            return;
-        }
-
-        PluginResult result = new PluginResult( OK, sdk.getSettings().isMuted() );
-        callbackContext.sendPluginResult( result );
-    }
-
     public void setVerboseLogging(final boolean verboseLoggingEnabled, final CallbackContext callbackContext)
     {
-        if ( sdk != null )
+        if ( isPluginInitialized )
         {
             sdk.getSettings().setVerboseLogging( verboseLoggingEnabled );
             verboseLoggingToSet = null;
@@ -344,7 +329,7 @@ public class AppLovinMAX
 
     public void setTestDeviceAdvertisingIds(final List<String> advertisingIds, final CallbackContext callbackContext)
     {
-        if ( sdk != null )
+        if ( isPluginInitialized )
         {
             sdk.getSettings().setTestDeviceAdvertisingIds( advertisingIds );
             testDeviceAdvertisingIdsToSet = null;
@@ -370,34 +355,6 @@ public class AppLovinMAX
         sdk.getEventService().trackEvent( event, parametersToUse );
 
         callbackContext.success();
-    }
-
-    // AD INFO
-
-    public void getAdInfo(final String adUnitId, final CallbackContext callbackContext) throws JSONException
-    {
-        if ( TextUtils.isEmpty( adUnitId ) )
-        {
-            callbackContext.sendPluginResult( new PluginResult( ERROR ) );
-            return;
-        }
-
-        final MaxAd ad;
-        synchronized ( mAdInfoMapLock )
-        {
-            ad = mAdInfoMap.get( adUnitId );
-        }
-
-        if ( ad == null )
-        {
-            callbackContext.sendPluginResult( new PluginResult( ERROR ) );
-            return;
-        }
-
-        JSONObject adInfo = new JSONObject();
-        adInfo.put( "adUnitId", adUnitId );
-        adInfo.put( "networkName", ad.getNetworkName() );
-        callbackContext.success( adInfo );
     }
 
     // BANNERS
@@ -482,12 +439,6 @@ public class AppLovinMAX
         interstitial.loadAd();
     }
 
-    public boolean isInterstitialReady(final String adUnitId, final CallbackContext callbackContext)
-    {
-        MaxInterstitialAd interstitial = retrieveInterstitial( adUnitId );
-        return interstitial.isReady();
-    }
-
     public void showInterstitial(final String adUnitId, final String placement, final CallbackContext callbackContext)
     {
         MaxInterstitialAd interstitial = retrieveInterstitial( adUnitId );
@@ -566,11 +517,6 @@ public class AppLovinMAX
             return;
         }
 
-        synchronized ( mAdInfoMapLock )
-        {
-            mAdInfoMap.put( ad.getAdUnitId(), ad );
-        }
-
         try
         {
             JSONObject params = new JSONObject();
@@ -606,11 +552,6 @@ public class AppLovinMAX
         {
             logStackTrace( new IllegalStateException( "invalid adUnitId: " + adUnitId ) );
             return;
-        }
-
-        synchronized ( mAdInfoMapLock )
-        {
-            mAdInfoMap.remove( adUnitId );
         }
 
         try
@@ -1341,14 +1282,6 @@ public class AppLovinMAX
             String sdkKey = args.getString( 1 );
             initialize( pluginVersion, sdkKey, callbackContext );
         }
-        else if ( "isInitialized".equalsIgnoreCase( action ) )
-        {
-            isInitialized( callbackContext );
-        }
-        else if ( "isTablet".equalsIgnoreCase( action ) )
-        {
-            isTablet( callbackContext );
-        }
         else if ( "showMediationDebugger".equalsIgnoreCase( action ) )
         {
             showMediationDebugger( callbackContext );
@@ -1394,10 +1327,6 @@ public class AppLovinMAX
             boolean isMuted = args.getBoolean( 0 );
             setMuted( isMuted, callbackContext );
         }
-        else if ( "isMuted".equalsIgnoreCase( action ) )
-        {
-            isMuted( callbackContext );
-        }
         else if ( "setVerboseLogging".equalsIgnoreCase( action ) )
         {
             boolean isVerboseLogging = args.getBoolean( 0 );
@@ -1420,11 +1349,6 @@ public class AppLovinMAX
             String event = args.getString( 0 );
             JSONObject parameters = args.getJSONObject( 1 );
             trackEvent( event, parameters, callbackContext );
-        }
-        else if ( "getAdInfo".equalsIgnoreCase( action ) )
-        {
-            String adUnitId = args.getString( 0 );
-            getAdInfo( adUnitId, callbackContext );
         }
         else if ( "createBanner".equalsIgnoreCase( action ) )
         {
@@ -1510,11 +1434,6 @@ public class AppLovinMAX
             String adUnitId = args.getString( 0 );
             loadInterstitial( adUnitId, callbackContext );
         }
-        else if ( "isInterstitialReady".equalsIgnoreCase( action ) )
-        {
-            String adUnitId = args.getString( 0 );
-            isInterstitialReady( adUnitId, callbackContext );
-        }
         else if ( "showInterstitial".equalsIgnoreCase( action ) )
         {
             String adUnitId = args.getString( 0 );
@@ -1532,11 +1451,6 @@ public class AppLovinMAX
         {
             String adUnitId = args.getString( 0 );
             loadRewardedAd( adUnitId, callbackContext );
-        }
-        else if ( "isRewardedAdReady".equalsIgnoreCase( action ) )
-        {
-            String adUnitId = args.getString( 0 );
-            isRewardedAdReady( adUnitId, callbackContext );
         }
         else if ( "showRewardedAd".equalsIgnoreCase( action ) )
         {

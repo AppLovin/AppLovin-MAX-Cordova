@@ -284,19 +284,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
-- (void/*BOOL*/)isMuted:(CDVInvokedUrlCommand *)command
-{
-    if ( ![self isPluginInitialized] )
-    {
-        [self sendErrorPluginResultForCommand: command withBool: NO];
-        return;
-    }
-    
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                                  messageAsBool: self.sdk.settings.muted];
-    [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-}
-
 - (void)setVerboseLogging:(CDVInvokedUrlCommand *)command
 {
     BOOL enabled = ((NSNumber *)[command argumentAtIndex: 0]).boolValue;
@@ -451,14 +438,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
-- (void/*BOOL*/)isInterstitialReady:(CDVInvokedUrlCommand *)command
-{
-    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
-    MAInterstitialAd *interstitial = [self retrieveInterstitialForAdUnitIdentifier: adUnitIdentifier];
-    
-    [self sendOKPluginResultForCommand: command withBool: [interstitial isReady]];
-}
-
 - (void)showInterstitial:(CDVInvokedUrlCommand *)command
 {
     NSString *adUnitIdentifier = [command argumentAtIndex: 0];
@@ -489,14 +468,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [rewardedAd loadAd];
     
     [self sendOKPluginResultForCommand: command];
-}
-
-- (void/*BOOL*/)isRewardedAdReady:(CDVInvokedUrlCommand *)command
-{
-    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
-    MARewardedAd *rewardedAd = [self retrieveRewardedAdForAdUnitIdentifier: adUnitIdentifier];
-    
-    [self sendOKPluginResultForCommand: command withBool: [rewardedAd isReady]];
 }
 
 - (void)showRewardedAd:(CDVInvokedUrlCommand *)command
