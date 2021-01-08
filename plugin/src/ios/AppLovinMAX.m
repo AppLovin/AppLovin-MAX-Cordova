@@ -54,9 +54,6 @@
 @property (nonatomic, strong) UIView *safeAreaBackground;
 @property (nonatomic, strong, nullable) UIColor *publisherBannerBackgroundColor;
 
-@property (nonatomic, strong) NSMutableDictionary<NSString *, MAAd *> *adInfoDict;
-@property (nonatomic, strong) NSObject *adInfoDictLock;
-
 @end
 
 @implementation AppLovinMAX
@@ -81,24 +78,11 @@ static NSString *const TAG = @"AppLovinMAX";
     self.safeAreaBackground.translatesAutoresizingMaskIntoConstraints = NO;
     self.safeAreaBackground.userInteractionEnabled = NO;
     [ROOT_VIEW_CONTROLLER.view addSubview: self.safeAreaBackground];
-    
-    self.adInfoDict = [NSMutableDictionary dictionary];
-    self.adInfoDictLock = [[NSObject alloc] init];
 }
 
-- (BOOL)isInitialized:(nullable CDVInvokedUrlCommand *)command
+- (BOOL)isInitialized
 {
-    BOOL isInitialized = [self isPluginInitialized] && [self isSDKInitialized];
-    
-    // If called from JS
-    if ( command )
-    {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsBool: isInitialized];
-        [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-    }
-    
-    // Called from this plugin
-    return isInitialized;
+    return [self isPluginInitialized] && [self isSDKInitialized];
 }
 
 - (void)initialize:(CDVInvokedUrlCommand *)command
@@ -106,8 +90,7 @@ static NSString *const TAG = @"AppLovinMAX";
     // Guard against running init logic multiple times
     if ( [self isPluginInitialized] )
     {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                                messageAsDictionary: @{@"consentDialogState" : @(self.sdk.configuration.consentDialogState)}];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsDictionary: [self initializationMessage]];
         [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
         
         return;
@@ -138,6 +121,28 @@ static NSString *const TAG = @"AppLovinMAX";
     self.sdk = [ALSdk sharedWithKey: sdkKey];
     [self.sdk setPluginVersion: [@"Cordova-" stringByAppendingString: pluginVersion]];
     [self.sdk setMediationProvider: ALMediationProviderMAX];
+    
+    // Set user id if needed
+    if ( [self.userIdentifierToSet al_isValidString] )
+    {
+        self.sdk.userIdentifier = self.userIdentifierToSet;
+        self.userIdentifierToSet = nil;
+    }
+    
+    // Set test device ids if needed
+    if ( self.testDeviceIdentifiersToSet )
+    {
+        self.sdk.settings.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
+        self.testDeviceIdentifiersToSet = nil;
+    }
+    
+    // Set verbose logging state if needed
+    if ( self.verboseLoggingToSet )
+    {
+        self.sdk.settings.isVerboseLogging = self.verboseLoggingToSet.boolValue;
+        self.verboseLoggingToSet = nil;
+    }
+    
     [self.sdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration *configuration)
      {
         [self log: @"SDK initialized"];
@@ -145,39 +150,37 @@ static NSString *const TAG = @"AppLovinMAX";
         self.sdkConfiguration = configuration;
         self.sdkInitialized = YES;
         
-        // Set user id if needed
-        if ( [self.userIdentifierToSet al_isValidString] )
-        {
-            self.sdk.userIdentifier = self.userIdentifierToSet;
-            self.userIdentifierToSet = nil;
-        }
-        
-        // Set test device ids if needed
-        if ( self.testDeviceIdentifiersToSet )
-        {
-            self.sdk.settings.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
-            self.testDeviceIdentifiersToSet = nil;
-        }
-        
-        // Set verbose logging state if needed
-        if ( self.verboseLoggingToSet )
-        {
-            self.sdk.settings.isVerboseLogging = self.verboseLoggingToSet.boolValue;
-            self.verboseLoggingToSet = nil;
-        }
-        
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                                messageAsDictionary: @{@"consentDialogState" : @(configuration.consentDialogState)}];
+        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsDictionary: [self initializationMessage]];
         [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
     }];
 }
 
+- (NSDictionary<NSString *, id> *)initializationMessage
+{
+    NSMutableDictionary<NSString *, id> *message = [NSMutableDictionary dictionaryWithCapacity: 4];
+    
+    if ( self.sdkConfiguration )
+    {
+        message[@"consentDialogState"] = @(self.sdkConfiguration.consentDialogState);
+    }
+    else
+    {
+        message[@"consentDialogState"] = @(ALConsentDialogStateUnknown);
+    }
+    
+    message[@"hasUserConsent"] = @([ALPrivacySettings hasUserConsent]);
+    message[@"isAgeRestrictedUser"] = @([ALPrivacySettings isAgeRestrictedUser]);
+    message[@"isDoNotSell"] = @([ALPrivacySettings isDoNotSell]);
+    message[@"isTablet"] = @([self isTablet]);
+    
+    return message;
+}
+
 #pragma mark - General Public API
 
-- (void/*BOOL*/)isTablet:(CDVInvokedUrlCommand *)command
+- (BOOL)isTablet
 {
-    BOOL isTablet = [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad;
-    [self sendOKPluginResultForCommand: command withBool: isTablet];
+    return [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad;
 }
 
 - (void)showMediationDebugger:(CDVInvokedUrlCommand *)command
@@ -197,7 +200,7 @@ static NSString *const TAG = @"AppLovinMAX";
 
 - (void/*BOOL*/)getConsentDialogState:(CDVInvokedUrlCommand *)command
 {
-    if ( ![self isInitialized: nil] )
+    if ( ![self isInitialized] )
     {
         CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
                                                  messageAsNSInteger: ALConsentDialogStateUnknown];
@@ -338,35 +341,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [self.sdk.eventService trackEvent: event parameters: parameters];
     
     [self sendOKPluginResultForCommand: command];
-}
-
-#pragma mark - Ad Info
-
-- (void/*NSDictionary*/)getAdInfo:(CDVInvokedUrlCommand *)command
-{
-    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
-    if ( adUnitIdentifier.length == 0 )
-    {
-        [self sendErrorPluginResultForCommand: command];
-        return;
-    }
-    
-    MAAd *ad;
-    @synchronized ( self.adInfoDictLock )
-    {
-        ad = self.adInfoDict[adUnitIdentifier];
-    }
-    
-    if ( !ad )
-    {
-        [self sendErrorPluginResultForCommand: command];
-        return;
-    }
-    
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                            messageAsDictionary: @{@"adUnitId" : adUnitIdentifier,
-                                                                   @"networkName" : ad.networkName}];
-    [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
 }
 
 #pragma mark - Banners
@@ -582,12 +556,8 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    @synchronized ( self.adInfoDictLock )
-    {
-        self.adInfoDict[ad.adUnitIdentifier] = ad;
-    }
-    
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"networkName" : ad.networkName}];
 }
 
 - (void)didFailToLoadAdForAdUnitIdentifier:(NSString *)adUnitIdentifier withErrorCode:(NSInteger)errorCode
@@ -615,11 +585,6 @@ static NSString *const TAG = @"AppLovinMAX";
     {
         [self log: @"invalid adUnitId from %@", [NSThread callStackSymbols]];
         return;
-    }
-    
-    @synchronized ( self.adInfoDictLock )
-    {
-        [self.adInfoDict removeObjectForKey: adUnitIdentifier];
     }
     
     NSString *errorCodeStr = [@(errorCode) stringValue];
@@ -653,7 +618,8 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"networkName" : ad.networkName}];
 }
 
 - (void)didDisplayAd:(MAAd *)ad
@@ -672,7 +638,8 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdDisplayedEvent";
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"networkName" : ad.networkName}];
 }
 
 - (void)didFailToDisplayAd:(MAAd *)ad withErrorCode:(NSInteger)errorCode
@@ -693,6 +660,7 @@ static NSString *const TAG = @"AppLovinMAX";
     
     NSString *errorCodeStr = [@(errorCode) stringValue];
     [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"networkName" : ad.networkName,
                                                 @"errorCode" : errorCodeStr}];
 }
 
@@ -712,7 +680,8 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdHiddenEvent";
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier}];
+    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                                @"networkName" : ad.networkName}];
 }
 
 - (void)didExpandAd:(MAAd *)ad
@@ -725,7 +694,8 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdExpandedEvent" : @"OnBannerAdExpandedEvent"
-                             body: @{@"adUnitId": ad.adUnitIdentifier}];
+                             body: @{@"adUnitId": ad.adUnitIdentifier,
+                                     @"networkName" : ad.networkName}];
 }
 
 - (void)didCollapseAd:(MAAd *)ad
@@ -738,7 +708,8 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdCollapsedEvent" : @"OnBannerAdCollapsedEvent"
-                             body: @{@"adUnitId" : ad.adUnitIdentifier}];
+                             body: @{@"adUnitId" : ad.adUnitIdentifier,
+                                     @"networkName" : ad.networkName}];
 }
 
 - (void)didCompleteRewardedVideoForAd:(MAAd *)ad
@@ -765,6 +736,7 @@ static NSString *const TAG = @"AppLovinMAX";
     NSString *rewardAmount = [@(rewardAmountInt) stringValue];
     
     [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: @{@"adUnitId": ad.adUnitIdentifier,
+                                                                              @"networkName" : ad.networkName,
                                                                               @"rewardLabel": rewardLabel,
                                                                               @"rewardAmount": rewardAmount}];
 }
