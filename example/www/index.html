@@ -19,22 +19,28 @@
 -->
 <html>
     <head>
+        <meta name="viewport" content="width=device-width,minimum-scale=1,maximum-scale=1,user-scalable=no">
         <meta charset="utf-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="css/index.css">
-        <title>Hello World</title>
+        <title>AppLovin MAX Demo App</title>
+        </script>
     </head>
     <body>
-        <div class="app">
-            <h1>Apache Cordova UPDATED</h1>
-            <div id="device">
-                <p>asdf</p>
-            </div>
+        <img src="img/logo.png" alt="Logo"/>
+        
+        <div id="outer">
+        <button id="med_debugger_button" class="button" onclick="showMediationDebugger()">Show Mediation Debugger</button>
+        <button id="inter_button" class="button" onclick="onInterButtonClicked()">Loading Interstitial...</button>
+        <button id="rewarded_ad_button" class="button" onclick="onRewardedAdButtonClicked()">Loading Rewarded Ad...</button>
+        <button id="banner_ad_button" class="button">Loading Banner Ad...</button>
+        <button id="mrec_ad_button" class="button">Loading MREC Ad...</button>
         </div>
+        
         <script src="cordova.js"></script>
         <script src="js/index.js"></script>
     </body>
