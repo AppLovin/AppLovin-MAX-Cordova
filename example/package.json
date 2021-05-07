@@ -1,7 +1,7 @@
 {
   "name": "com.applovin.enterprise.apps.demoapp",
   "displayName": "AppLovinMAXExample",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "AppLovin MAX Plugin Demo App.",
   "main": "index.js",
   "keywords": [
