@@ -10,10 +10,10 @@
   "author": "AppLovin Corporation",
   "license": "MIT",
   "devDependencies": {
-    "cordova-android": "^9.0.0",
+    "cordova-android": "^9.1.0",
     "cordova-browser": "^6.0.0",
     "cordova-ios": "^6.1.1",
-    "cordova-plugin-applovin-max": "^1.0.1",
+    "cordova-plugin-applovin-max": "file:../plugin",
     "cordova-plugin-device": "^2.0.3"
   },
   "cordova": {
