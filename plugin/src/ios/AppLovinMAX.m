@@ -527,8 +527,7 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                @"networkName" : ad.networkName}];
+    [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
 - (void)didFailToLoadAdForAdUnitIdentifier:(NSString *)adUnitIdentifier withErrorCode:(NSInteger)errorCode
@@ -589,8 +588,7 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                @"networkName" : ad.networkName}];
+    [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
 - (void)didDisplayAd:(MAAd *)ad
@@ -609,8 +607,7 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdDisplayedEvent";
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                @"networkName" : ad.networkName}];
+    [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
 - (void)didFailToDisplayAd:(MAAd *)ad withErrorCode:(NSInteger)errorCode
@@ -629,10 +626,10 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdFailedToDisplayEvent";
     }
     
-    NSString *errorCodeStr = [@(errorCode) stringValue];
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                @"networkName" : ad.networkName,
-                                                @"errorCode" : errorCodeStr}];
+    NSMutableDictionary *body = [@{@"errorCode" : @(errorCode)} mutableCopy];
+    [body addEntriesFromDictionary: [self adInfoForAd: ad]];
+    
+    [self fireWindowEventWithName: name body: body];
 }
 
 - (void)didHideAd:(MAAd *)ad
@@ -651,8 +648,7 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdHiddenEvent";
     }
     
-    [self fireWindowEventWithName: name body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                                @"networkName" : ad.networkName}];
+    [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
 - (void)didExpandAd:(MAAd *)ad
@@ -665,8 +661,7 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdExpandedEvent" : @"OnBannerAdExpandedEvent"
-                             body: @{@"adUnitId": ad.adUnitIdentifier,
-                                     @"networkName" : ad.networkName}];
+                             body: [self adInfoForAd: ad]];
 }
 
 - (void)didCollapseAd:(MAAd *)ad
@@ -679,8 +674,7 @@ static NSString *const TAG = @"AppLovinMAX";
     }
     
     [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdCollapsedEvent" : @"OnBannerAdCollapsedEvent"
-                             body: @{@"adUnitId" : ad.adUnitIdentifier,
-                                     @"networkName" : ad.networkName}];
+                             body: [self adInfoForAd: ad]];
 }
 
 - (void)didCompleteRewardedVideoForAd:(MAAd *)ad
@@ -706,10 +700,11 @@ static NSString *const TAG = @"AppLovinMAX";
     NSInteger rewardAmountInt = reward ? reward.amount : 0;
     NSString *rewardAmount = [@(rewardAmountInt) stringValue];
     
-    [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: @{@"adUnitId": ad.adUnitIdentifier,
-                                                                              @"networkName" : ad.networkName,
-                                                                              @"rewardLabel": rewardLabel,
-                                                                              @"rewardAmount": rewardAmount}];
+    NSMutableDictionary *body = [@{@"rewardLabel": rewardLabel,
+                                   @"rewardAmount": rewardAmount} mutableCopy];
+    [body addEntriesFromDictionary: [self adInfoForAd: ad]];
+    
+    [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: body];
 }
 
 #pragma mark - Internal Methods
@@ -1086,6 +1081,15 @@ static NSString *const TAG = @"AppLovinMAX";
         [NSException raise: NSInvalidArgumentException format: @"Invalid ad format"];
         return CGSizeZero;
     }
+}
+
+- (NSDictionary<NSString *, id> *)adInfoForAd:(MAAd *)ad
+{
+    return @{@"adUnitId" : ad.adUnitIdentifier,
+             @"creativeId" : ad.creativeIdentifier,
+             @"networkName" : ad.networkName,
+             @"placement" : ad.placement,
+             @"revenue" : @(ad.revenue)};
 }
 
 #pragma mark - Cordova Event Bridge (via window)
