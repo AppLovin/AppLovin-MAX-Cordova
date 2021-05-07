@@ -161,35 +161,30 @@ public class AppLovinMAX
             verboseLoggingToSet = null;
         }
 
-        sdk.initializeSdk( new AppLovinSdk.SdkInitializationListener()
-        {
-            @Override
-            public void onSdkInitialized(final AppLovinSdkConfiguration configuration)
+        sdk.initializeSdk( configuration -> {
+            d( "SDK initialized" );
+
+            sdkConfiguration = configuration;
+            isSdkInitialized = true;
+
+            // Enable orientation change listener, so that the position can be updated for vertical banners.
+            new OrientationEventListener( getCurrentActivity() )
             {
-                d( "SDK initialized" );
-
-                sdkConfiguration = configuration;
-                isSdkInitialized = true;
-
-                // Enable orientation change listener, so that the position can be updated for vertical banners.
-                new OrientationEventListener( getCurrentActivity() )
+                @Override
+                public void onOrientationChanged(final int orientation)
                 {
-                    @Override
-                    public void onOrientationChanged(final int orientation)
+                    for ( final Map.Entry<String, MaxAdFormat> adUnitFormats : mVerticalAdViewFormats.entrySet() )
                     {
-                        for ( final Map.Entry<String, MaxAdFormat> adUnitFormats : mVerticalAdViewFormats.entrySet() )
-                        {
-                            positionAdView( adUnitFormats.getKey(), adUnitFormats.getValue() );
-                        }
+                        positionAdView( adUnitFormats.getKey(), adUnitFormats.getValue() );
                     }
-                }.enable();
-
-                try
-                {
-                    callbackContext.success( getInitializationMessage( context ) );
                 }
-                catch ( Throwable ignored ) {}
+            }.enable();
+
+            try
+            {
+                callbackContext.success( getInitializationMessage( context ) );
             }
+            catch ( Throwable ignored ) {}
         } );
     }
 
@@ -517,17 +512,11 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
-    public void onAdLoadFailed(String adUnitId, final int errorCode)
+    public void onAdLoadFailed(final String adUnitId, final int errorCode)
     {
         if ( TextUtils.isEmpty( adUnitId ) )
         {
@@ -591,13 +580,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -617,13 +600,7 @@ public class AppLovinMAX
             name = "OnRewardedAdDisplayedEvent";
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -645,8 +622,7 @@ public class AppLovinMAX
 
         try
         {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
+            JSONObject params = getAdInfo( ad );
             params.put( "errorCode", Integer.toString( errorCode ) );
             fireWindowEvent( name, params );
         }
@@ -670,13 +646,7 @@ public class AppLovinMAX
             name = "OnRewardedAdHiddenEvent";
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -689,13 +659,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMrecAdCollapsedEvent" : "OnBannerAdExpandedEvent", params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMrecAdCollapsedEvent" : "OnBannerAdExpandedEvent", getAdInfo( ad ) );
     }
 
     @Override
@@ -708,13 +672,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", getAdInfo( ad ) );
     }
 
     @Override
@@ -744,8 +702,7 @@ public class AppLovinMAX
 
         try
         {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
+            JSONObject params = getAdInfo( ad );
             params.put( "rewardLabel", rewardLabel );
             params.put( "rewardAmount", rewardAmount );
             fireWindowEvent( "OnRewardedAdReceivedRewardEvent", params );
@@ -758,252 +715,220 @@ public class AppLovinMAX
     private void createAdView(final String adUnitId, final MaxAdFormat adFormat, final String adViewPosition, final CallbackContext callbackContext)
     {
         // Run on main thread to ensure there are no concurrency issues with other ad view methods
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Creating " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\" and position: \"" + adViewPosition + "\"" );
+
+            // Retrieve ad view from the map
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat, adViewPosition );
+            if ( adView == null )
             {
-                d( "Creating " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\" and position: \"" + adViewPosition + "\"" );
-
-                // Retrieve ad view from the map
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat, adViewPosition );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                adView.setVisibility( View.GONE );
-
-                if ( adView.getParent() == null )
-                {
-                    final Activity currentActivity = getCurrentActivity();
-                    final RelativeLayout relativeLayout = new RelativeLayout( currentActivity );
-                    currentActivity.addContentView( relativeLayout, new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT,
-                                                                                                   LinearLayout.LayoutParams.MATCH_PARENT ) );
-                    relativeLayout.addView( adView );
-
-                    // Position ad view immediately so if publisher sets color before ad loads, it will not be the size of the screen
-                    mAdViewAdFormats.put( adUnitId, adFormat );
-                    positionAdView( adUnitId, adFormat );
-                }
-
-                adView.loadAd();
-
-                // The publisher may have requested to show the banner before it was created. Now that the banner is created, show it.
-                if ( mAdUnitIdsToShowAfterCreate.contains( adUnitId ) )
-                {
-                    showAdView( adUnitId, adFormat, null );
-                    mAdUnitIdsToShowAfterCreate.remove( adUnitId );
-                }
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            adView.setVisibility( View.GONE );
+
+            if ( adView.getParent() == null )
+            {
+                final Activity currentActivity = getCurrentActivity();
+                final RelativeLayout relativeLayout = new RelativeLayout( currentActivity );
+                currentActivity.addContentView( relativeLayout, new LinearLayout.LayoutParams( LinearLayout.LayoutParams.MATCH_PARENT,
+                                                                                               LinearLayout.LayoutParams.MATCH_PARENT ) );
+                relativeLayout.addView( adView );
+
+                // Position ad view immediately so if publisher sets color before ad loads, it will not be the size of the screen
+                mAdViewAdFormats.put( adUnitId, adFormat );
+                positionAdView( adUnitId, adFormat );
+            }
+
+            adView.loadAd();
+
+            // The publisher may have requested to show the banner before it was created. Now that the banner is created, show it.
+            if ( mAdUnitIdsToShowAfterCreate.contains( adUnitId ) )
+            {
+                showAdView( adUnitId, adFormat, null );
+                mAdUnitIdsToShowAfterCreate.remove( adUnitId );
+            }
+
+            callbackContext.success();
         } );
     }
 
     private void setAdViewPlacement(final String adUnitId, final MaxAdFormat adFormat, final String placement, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Setting placement \"" + placement + "\" for " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
+
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Setting placement \"" + placement + "\" for " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
-
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                adView.setPlacement( placement );
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            adView.setPlacement( placement );
+
+            callbackContext.success();
         } );
     }
 
     private void updateAdViewPosition(final String adUnitId, final String adViewPosition, final MaxAdFormat adFormat, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Updating " + adFormat.getLabel() + " position to \"" + adViewPosition + "\" for ad unit id \"" + adUnitId + "\"" );
+
+            // Retrieve ad view from the map
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Updating " + adFormat.getLabel() + " position to \"" + adViewPosition + "\" for ad unit id \"" + adUnitId + "\"" );
-
-                // Retrieve ad view from the map
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                // Check if the previous position is same as the new position. If so, no need to update the position again.
-                final String previousPosition = mAdViewPositions.get( adUnitId );
-                if ( adViewPosition == null || adViewPosition.equals( previousPosition ) ) return;
-
-                mAdViewPositions.put( adUnitId, adViewPosition );
-                positionAdView( adUnitId, adFormat );
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            // Check if the previous position is same as the new position. If so, no need to update the position again.
+            final String previousPosition = mAdViewPositions.get( adUnitId );
+            if ( adViewPosition == null || adViewPosition.equals( previousPosition ) ) return;
+
+            mAdViewPositions.put( adUnitId, adViewPosition );
+            positionAdView( adUnitId, adFormat );
+
+            callbackContext.success();
         } );
     }
 
     private void showAdView(final String adUnitId, final MaxAdFormat adFormat, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Showing " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
+
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Showing " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
+                e( adFormat.getLabel() + " does not exist for ad unit id " + adUnitId );
 
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist for ad unit id " + adUnitId );
-
-                    // The adView has not yet been created. Store the ad unit ID, so that it can be displayed once the banner has been created.
-                    mAdUnitIdsToShowAfterCreate.add( adUnitId );
-                    return;
-                }
-
-                adView.setVisibility( View.VISIBLE );
-                adView.startAutoRefresh();
-
-                callbackContext.success();
+                // The adView has not yet been created. Store the ad unit ID, so that it can be displayed once the banner has been created.
+                mAdUnitIdsToShowAfterCreate.add( adUnitId );
+                return;
             }
+
+            adView.setVisibility( View.VISIBLE );
+            adView.startAutoRefresh();
+
+            callbackContext.success();
         } );
     }
 
     private void hideAdView(final String adUnitId, final MaxAdFormat adFormat, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Hiding " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
+            mAdUnitIdsToShowAfterCreate.remove( adUnitId );
+
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Hiding " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
-                mAdUnitIdsToShowAfterCreate.remove( adUnitId );
-
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                adView.setVisibility( View.GONE );
-                adView.stopAutoRefresh();
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            adView.setVisibility( View.GONE );
+            adView.stopAutoRefresh();
+
+            callbackContext.success();
         } );
     }
 
     private void destroyAdView(final String adUnitId, final MaxAdFormat adFormat, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Destroying " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
+
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Destroying " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\"" );
-
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                final ViewParent parent = adView.getParent();
-                if ( parent instanceof ViewGroup )
-                {
-                    ( (ViewGroup) parent ).removeView( adView );
-                }
-
-                adView.setListener( null );
-                adView.destroy();
-
-                mAdViews.remove( adUnitId );
-                mAdViewAdFormats.remove( adUnitId );
-                mAdViewPositions.remove( adUnitId );
-                mVerticalAdViewFormats.remove( adUnitId );
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            final ViewParent parent = adView.getParent();
+            if ( parent instanceof ViewGroup )
+            {
+                ( (ViewGroup) parent ).removeView( adView );
+            }
+
+            adView.setListener( null );
+            adView.destroy();
+
+            mAdViews.remove( adUnitId );
+            mAdViewAdFormats.remove( adUnitId );
+            mAdViewPositions.remove( adUnitId );
+            mVerticalAdViewFormats.remove( adUnitId );
+
+            callbackContext.success();
         } );
     }
 
     private void setAdViewBackgroundColor(final String adUnitId, final MaxAdFormat adFormat, final String hexColorCode, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Setting " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\" to color: " + hexColorCode );
+
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Setting " + adFormat.getLabel() + " with ad unit id \"" + adUnitId + "\" to color: " + hexColorCode );
-
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                adView.setBackgroundColor( Color.parseColor( hexColorCode ) );
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            adView.setBackgroundColor( Color.parseColor( hexColorCode ) );
+
+            callbackContext.success();
         } );
     }
 
     private void setAdViewExtraParameters(final String adUnitId, final MaxAdFormat adFormat, final String value, final String key, final CallbackContext callbackContext)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
+        getCurrentActivity().runOnUiThread( () -> {
+
+            d( "Setting " + adFormat.getLabel() + " extra with key: \"" + key + "\" value: " + value );
+
+            // Retrieve ad view from the map
+            final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
+            if ( adView == null )
             {
-                d( "Setting " + adFormat.getLabel() + " extra with key: \"" + key + "\" value: " + value );
-
-                // Retrieve ad view from the map
-                final MaxAdView adView = retrieveAdView( adUnitId, adFormat );
-                if ( adView == null )
-                {
-                    e( adFormat.getLabel() + " does not exist" );
-                    return;
-                }
-
-                adView.setExtraParameter( key, value );
-
-                // Handle local changes as needed
-                if ( "force_banner".equalsIgnoreCase( key ) && MaxAdFormat.MREC != adFormat )
-                {
-                    final MaxAdFormat forcedAdFormat;
-
-                    boolean shouldForceBanner = Boolean.parseBoolean( value );
-                    if ( shouldForceBanner )
-                    {
-                        forcedAdFormat = MaxAdFormat.BANNER;
-                    }
-                    else
-                    {
-                        forcedAdFormat = getDeviceSpecificBannerAdViewAdFormat();
-                    }
-
-                    mAdViewAdFormats.put( adUnitId, forcedAdFormat );
-                    positionAdView( adUnitId, forcedAdFormat );
-                }
-
-                callbackContext.success();
+                e( adFormat.getLabel() + " does not exist" );
+                return;
             }
+
+            adView.setExtraParameter( key, value );
+
+            // Handle local changes as needed
+            if ( "force_banner".equalsIgnoreCase( key ) && MaxAdFormat.MREC != adFormat )
+            {
+                final MaxAdFormat forcedAdFormat;
+
+                boolean shouldForceBanner = Boolean.parseBoolean( value );
+                if ( shouldForceBanner )
+                {
+                    forcedAdFormat = MaxAdFormat.BANNER;
+                }
+                else
+                {
+                    forcedAdFormat = getDeviceSpecificBannerAdViewAdFormat();
+                }
+
+                mAdViewAdFormats.put( adUnitId, forcedAdFormat );
+                positionAdView( adUnitId, forcedAdFormat );
+            }
+
+            callbackContext.success();
         } );
     }
 
@@ -1259,18 +1184,29 @@ public class AppLovinMAX
         }
     }
 
+    private JSONObject getAdInfo(final MaxAd ad)
+    {
+        JSONObject adInfo = null;
+
+        try
+        {
+            adInfo = new JSONObject();
+            adInfo.put( "adUnitId", ad.getAdUnitId() );
+            adInfo.put( "creativeId", ad.getCreativeId() );
+            adInfo.put( "networkName", ad.getNetworkName() );
+            adInfo.put( "placement", ad.getPlacement() );
+            adInfo.put( "revenue", ad.getRevenue() );
+        }
+        catch ( JSONException ignored ) { }
+
+        return adInfo;
+    }
+
     // React Native Bridge
 
     private void fireWindowEvent(final String name, final JSONObject params)
     {
-        getCurrentActivity().runOnUiThread( new Runnable()
-        {
-            @Override
-            public void run()
-            {
-                webView.loadUrl( "javascript:cordova.fireWindowEvent('" + name + "', " + params.toString() + ");" );
-            }
-        } );
+        getCurrentActivity().runOnUiThread( () -> webView.loadUrl( "javascript:cordova.fireWindowEvent('" + name + "', " + params.toString() + ");" ) );
     }
 
     @Override
