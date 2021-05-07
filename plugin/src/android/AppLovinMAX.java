@@ -1192,9 +1192,10 @@ public class AppLovinMAX
         {
             adInfo = new JSONObject();
             adInfo.put( "adUnitId", ad.getAdUnitId() );
-            adInfo.put( "creativeId", ad.getCreativeId() );
+            adInfo.put( "creativeId", !TextUtils.isEmpty( ad.getCreativeId() ) ? ad.getCreativeId() : "" );
             adInfo.put( "networkName", ad.getNetworkName() );
             adInfo.put( "placement", ad.getPlacement() );
+            adInfo.put( "placement", !TextUtils.isEmpty( ad.getPlacement() ) ? ad.getPlacement() : "" );
             adInfo.put( "revenue", ad.getRevenue() );
         }
         catch ( JSONException ignored ) { }
