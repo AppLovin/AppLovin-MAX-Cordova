@@ -517,17 +517,11 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
-    public void onAdLoadFailed(String adUnitId, final int errorCode)
+    public void onAdLoadFailed(final String adUnitId, final int errorCode)
     {
         if ( TextUtils.isEmpty( adUnitId ) )
         {
@@ -591,13 +585,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -617,13 +605,7 @@ public class AppLovinMAX
             name = "OnRewardedAdDisplayedEvent";
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -645,8 +627,7 @@ public class AppLovinMAX
 
         try
         {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
+            JSONObject params = getAdInfo( ad );
             params.put( "errorCode", Integer.toString( errorCode ) );
             fireWindowEvent( name, params );
         }
@@ -670,13 +651,7 @@ public class AppLovinMAX
             name = "OnRewardedAdHiddenEvent";
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( name, params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( name, getAdInfo( ad ) );
     }
 
     @Override
@@ -689,13 +664,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMrecAdCollapsedEvent" : "OnBannerAdExpandedEvent", params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMrecAdCollapsedEvent" : "OnBannerAdExpandedEvent", getAdInfo( ad ) );
     }
 
     @Override
@@ -708,13 +677,7 @@ public class AppLovinMAX
             return;
         }
 
-        try
-        {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
-            fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", params );
-        }
-        catch ( Throwable ignored ) { }
+        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", getAdInfo( ad ) );
     }
 
     @Override
@@ -744,8 +707,7 @@ public class AppLovinMAX
 
         try
         {
-            JSONObject params = new JSONObject();
-            params.put( "adUnitId", ad.getAdUnitId() );
+            JSONObject params = getAdInfo( ad );
             params.put( "rewardLabel", rewardLabel );
             params.put( "rewardAmount", rewardAmount );
             fireWindowEvent( "OnRewardedAdReceivedRewardEvent", params );
@@ -1257,6 +1219,24 @@ public class AppLovinMAX
         {
             throw new IllegalArgumentException( "Invalid ad format" );
         }
+    }
+
+    private JSONObject getAdInfo(final MaxAd ad)
+    {
+        JSONObject adInfo = null;
+
+        try
+        {
+            adInfo = new JSONObject();
+            adInfo.put( "adUnitId", ad.getAdUnitId() );
+            adInfo.put( "creativeId", ad.getCreativeId() );
+            adInfo.put( "networkName", ad.getNetworkName() );
+            adInfo.put( "placement", ad.getPlacement() );
+            adInfo.put( "revenue", ad.getRevenue() );
+        }
+        catch ( JSONException ignored ) { }
+
+        return adInfo;
     }
 
     // React Native Bridge
