@@ -111,7 +111,7 @@ public class AppLovinMAX
 
         d( "Initializing AppLovin MAX Cordova v" + pluginVersion + "..." );
 
-        // If SDK key passed in is empty, check Info.plist
+        // If SDK key passed in is empty, check Android Manifest
         String sdkKeyToUse = sdkKey;
         if ( TextUtils.isEmpty( sdkKey ) )
         {
@@ -221,7 +221,7 @@ public class AppLovinMAX
     {
         if ( sdk == null )
         {
-            Log.e( "[" + TAG + "]", "Failed to show mediation debugger - please ensure the AppLovin MAX Unity Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!" );
+            Log.e( "[" + TAG + "]", "Failed to show mediation debugger - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!" );
             return;
         }
 
@@ -587,7 +587,7 @@ public class AppLovinMAX
     @Override
     public void onAdDisplayed(final MaxAd ad)
     {
-        // BMLs do not support [DISPLAY] events in Unity
+        // BMLs do not support [DISPLAY] events
         final MaxAdFormat adFormat = ad.getFormat();
         if ( adFormat != MaxAdFormat.INTERSTITIAL && adFormat != MaxAdFormat.REWARDED ) return;
 
@@ -607,7 +607,7 @@ public class AppLovinMAX
     @Override
     public void onAdDisplayFailed(final MaxAd ad, final int errorCode)
     {
-        // BMLs do not support [DISPLAY] events in Unity
+        // BMLs do not support [DISPLAY] events
         final MaxAdFormat adFormat = ad.getFormat();
         if ( adFormat != MaxAdFormat.INTERSTITIAL && adFormat != MaxAdFormat.REWARDED ) return;
 
@@ -633,7 +633,7 @@ public class AppLovinMAX
     @Override
     public void onAdHidden(final MaxAd ad)
     {
-        // BMLs do not support [HIDDEN] events in Unity
+        // BMLs do not support [HIDDEN] events
         final MaxAdFormat adFormat = ad.getFormat();
         if ( adFormat != MaxAdFormat.INTERSTITIAL && adFormat != MaxAdFormat.REWARDED ) return;
 
