@@ -1,6 +1,6 @@
 ## Versions
 
-## x.x.x
+## 1.0.4
     * Pass `"countryCode"` in initialization callback.
 ## 1.0.3
     * Fix crashes for when creative id or placement is nil for an ad.
