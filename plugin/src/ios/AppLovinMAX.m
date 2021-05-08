@@ -162,6 +162,7 @@ static NSString *const TAG = @"AppLovinMAX";
     if ( self.sdkConfiguration )
     {
         message[@"consentDialogState"] = @(self.sdkConfiguration.consentDialogState);
+        message[@"countryCode"] = self.sdkConfiguration.countryCode;
     }
     else
     {

@@ -195,6 +195,7 @@ public class AppLovinMAX
         if ( sdkConfiguration != null )
         {
             message.put( "consentDialogState", sdkConfiguration.getConsentDialogState().ordinal() );
+            message.put( "countryCode", sdkConfiguration.getCountryCode() );
         }
         else
         {
