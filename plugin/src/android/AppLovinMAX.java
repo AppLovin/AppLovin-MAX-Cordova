@@ -136,7 +136,7 @@ public class AppLovinMAX
         }
 
         // Initialize SDK
-        sdk = AppLovinSdk.getInstance( sdkKey, new AppLovinSdkSettings( context ), currentActivity );
+        sdk = AppLovinSdk.getInstance( sdkKeyToUse, new AppLovinSdkSettings( context ), currentActivity );
         sdk.setPluginVersion( "Cordova-" + pluginVersion );
         sdk.setMediationProvider( AppLovinMediationProvider.MAX );
 
