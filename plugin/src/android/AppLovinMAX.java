@@ -21,6 +21,7 @@ import com.applovin.mediation.MaxAd;
 import com.applovin.mediation.MaxAdFormat;
 import com.applovin.mediation.MaxAdListener;
 import com.applovin.mediation.MaxAdViewAdListener;
+import com.applovin.mediation.MaxError;
 import com.applovin.mediation.MaxReward;
 import com.applovin.mediation.MaxRewardedAdListener;
 import com.applovin.mediation.ads.MaxAdView;
@@ -517,7 +518,7 @@ public class AppLovinMAX
     }
 
     @Override
-    public void onAdLoadFailed(final String adUnitId, final int errorCode)
+    public void onAdLoadFailed(final String adUnitId, final MaxError error)
     {
         if ( TextUtils.isEmpty( adUnitId ) )
         {
@@ -548,7 +549,8 @@ public class AppLovinMAX
         {
             JSONObject params = new JSONObject();
             params.put( "adUnitId", adUnitId );
-            params.put( "errorCode", Integer.toString( errorCode ) );
+            params.put( "errorCode", Integer.toString( error.getCode() ) );
+            // TODO: Add "code", "message", and "adLoadFailureInfo"
             fireWindowEvent( name, params );
         }
         catch ( Throwable ignored ) { }
@@ -605,7 +607,7 @@ public class AppLovinMAX
     }
 
     @Override
-    public void onAdDisplayFailed(final MaxAd ad, final int errorCode)
+    public void onAdDisplayFailed(final MaxAd ad, final MaxError error)
     {
         // BMLs do not support [DISPLAY] events
         final MaxAdFormat adFormat = ad.getFormat();
@@ -624,7 +626,8 @@ public class AppLovinMAX
         try
         {
             JSONObject params = getAdInfo( ad );
-            params.put( "errorCode", Integer.toString( errorCode ) );
+            params.put( "errorCode", Integer.toString( error.getCode() ) );
+            // TODO: Add "code", "message"
             fireWindowEvent( name, params );
         }
         catch ( Throwable ignored ) { }
@@ -709,6 +712,12 @@ public class AppLovinMAX
             fireWindowEvent( "OnRewardedAdReceivedRewardEvent", params );
         }
         catch ( Throwable ignored ) { }
+    }
+
+    @Override
+    public void onAdRevenuePaid(final MaxAd ad)
+    {
+        // TODO: Add Support
     }
 
     // INTERNAL METHODS

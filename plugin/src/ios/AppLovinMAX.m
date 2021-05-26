@@ -531,7 +531,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
-- (void)didFailToLoadAdForAdUnitIdentifier:(NSString *)adUnitIdentifier withErrorCode:(NSInteger)errorCode
+- (void)didFailToLoadAdForAdUnitIdentifier:(NSString *)adUnitIdentifier withError:(MAError *)error
 {
     if ( !adUnitIdentifier )
     {
@@ -558,7 +558,8 @@ static NSString *const TAG = @"AppLovinMAX";
         return;
     }
     
-    NSString *errorCodeStr = [@(errorCode) stringValue];
+    // TODO: Add "code", "message", and "adLoadFailureInfo"
+    NSString *errorCodeStr = [@(error.code) stringValue];
     [self fireWindowEventWithName: name body: @{@"adUnitId" : adUnitIdentifier,
                                                 @"errorCode" : errorCodeStr}];
 }
@@ -611,7 +612,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self fireWindowEventWithName: name body: [self adInfoForAd: ad]];
 }
 
-- (void)didFailToDisplayAd:(MAAd *)ad withErrorCode:(NSInteger)errorCode
+- (void)didFailToDisplayAd:(MAAd *)ad withError:(MAError *)error
 {
     // BMLs do not support [DISPLAY] events in Unity
     MAAdFormat *adFormat = ad.format;
@@ -627,7 +628,8 @@ static NSString *const TAG = @"AppLovinMAX";
         name = @"OnRewardedAdFailedToDisplayEvent";
     }
     
-    NSMutableDictionary *body = [@{@"errorCode" : @(errorCode)} mutableCopy];
+    // TODO: Add "code", "message"
+    NSMutableDictionary *body = [@{@"errorCode" : @(error.code)} mutableCopy];
     [body addEntriesFromDictionary: [self adInfoForAd: ad]];
     
     [self fireWindowEventWithName: name body: body];
@@ -706,6 +708,11 @@ static NSString *const TAG = @"AppLovinMAX";
     [body addEntriesFromDictionary: [self adInfoForAd: ad]];
     
     [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: body];
+}
+
+- (void)didPayRevenueForAd:(MAAd *)ad
+{
+    // TODO: Implement
 }
 
 #pragma mark - Internal Methods
