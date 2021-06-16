@@ -710,11 +710,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [self fireWindowEventWithName: @"OnRewardedAdReceivedRewardEvent" body: body];
 }
 
-- (void)didPayRevenueForAd:(MAAd *)ad
-{
-    // TODO: Implement
-}
-
 #pragma mark - Internal Methods
 
 - (void)createAdViewWithAdUnitIdentifier:(NSString *)adUnitIdentifier adFormat:(MAAdFormat *)adFormat atPosition:(NSString *)adViewPosition command:(CDVInvokedUrlCommand *)command

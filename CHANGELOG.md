@@ -1,5 +1,7 @@
 ## Versions
 
+## x.x.x
+    * Add support for latest SDKs v10.3.1 with new callbacks.
 ## 1.0.5
     * Add support for latest SDKs v10.3.0 with new callbacks.
     * Fallback to SDK key in Android Manifest and Info.plist if not passed programmatically.

@@ -714,12 +714,6 @@ public class AppLovinMAX
         catch ( Throwable ignored ) { }
     }
 
-    @Override
-    public void onAdRevenuePaid(final MaxAd ad)
-    {
-        // TODO: Add Support
-    }
-
     // INTERNAL METHODS
 
     private void createAdView(final String adUnitId, final MaxAdFormat adFormat, final String adViewPosition, final CallbackContext callbackContext)
