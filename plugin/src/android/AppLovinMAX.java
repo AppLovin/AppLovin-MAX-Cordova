@@ -378,7 +378,7 @@ public class AppLovinMAX
 
     public void setBannerExtraParameter(final String adUnitId, final String key, final String value, final CallbackContext callbackContext)
     {
-        setAdViewExtraParameters( adUnitId, getDeviceSpecificBannerAdViewAdFormat(), value, key, callbackContext );
+        setAdViewExtraParameters( adUnitId, getDeviceSpecificBannerAdViewAdFormat(), key, value, callbackContext );
     }
 
     public void showBanner(final String adUnitId, final CallbackContext callbackContext)
@@ -897,7 +897,7 @@ public class AppLovinMAX
         } );
     }
 
-    private void setAdViewExtraParameters(final String adUnitId, final MaxAdFormat adFormat, final String value, final String key, final CallbackContext callbackContext)
+    private void setAdViewExtraParameters(final String adUnitId, final MaxAdFormat adFormat, final String key, final String value, final CallbackContext callbackContext)
     {
         getCurrentActivity().runOnUiThread( () -> {
 
