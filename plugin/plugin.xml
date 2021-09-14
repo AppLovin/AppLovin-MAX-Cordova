@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-applovin-max" version="1.0.6">
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0" id="cordova-plugin-applovin-max" version="1.0.7">
     <name>AppLovin MAX</name>
     <description>AppLovin MAX Cordova Plugin</description>
     <license>MIT</license>
@@ -37,6 +37,10 @@
 
         <header-file src="src/ios/AppLovinMAX.h" />
         <source-file src="src/ios/AppLovinMAX.m" />
+        
+        <edit-config target="NSAdvertisingAttributionReportEndpoint" file="*-Info.plist" mode="merge">
+            <string>https://postbacks-app.com/mping</string>
+        </edit-config>
         
         <podspec>
           <config>
