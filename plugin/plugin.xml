@@ -39,7 +39,7 @@
         <source-file src="src/ios/AppLovinMAX.m" />
         
         <edit-config target="NSAdvertisingAttributionReportEndpoint" file="*-Info.plist" mode="merge">
-            <string>https://postbacks-app.com/mping</string>
+            <string>https://postbacks-app.com</string>
         </edit-config>
         
         <podspec>
