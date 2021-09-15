@@ -38,6 +38,10 @@
         <header-file src="src/ios/AppLovinMAX.h" />
         <source-file src="src/ios/AppLovinMAX.m" />
         
+        <edit-config target="NSAdvertisingAttributionReportEndpoint" file="*-Info.plist" mode="merge">
+            <string>https://postbacks-app.com</string>
+        </edit-config>
+        
         <podspec>
           <config>
             <source url="https://github.com/AppLovin/Public-CocoaPods-Specs" />
