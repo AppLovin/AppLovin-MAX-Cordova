@@ -1,6 +1,6 @@
 ## Versions
 
-## x.x.x
+## 1.0.7
     * Automatically add `NSAdvertisingAttributionReportEndpoint` to `Info.plist`.
 ## 1.0.6
     * Add support for latest SDKs v10.3.1 with new callbacks.
