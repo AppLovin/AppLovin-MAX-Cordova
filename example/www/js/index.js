@@ -158,16 +158,16 @@ function initializeBannerAds() {
 }
 
 function initializeMRecAds() {
-    window.addEventListener('onMRecAdLoadedEvent', function (adInfo) {
+    window.addEventListener('OnMRecAdLoadedEvent', function (adInfo) {
         mrecAdButton.innerHTML = 'Showing MREC Ad...';
         AppLovinMAX.showMRec(MREC_AD_UNIT_ID);
     });
-    window.addEventListener('onMRecAdLoadFailedEvent', function (adInfo) {
+    window.addEventListener('OnMRecAdLoadFailedEvent', function (adInfo) {
         rewardedAdButton.innerHTML = 'MREC Ad Failed to Load';
     });
-    window.addEventListener('onMRecAdClickedEvent', function (adInfo) {});
-    window.addEventListener('onMRecAdCollapsedEvent', function (adInfo) {});
-    window.addEventListener('onMRecAdExpandedEvent', function (adInfo) {});
+    window.addEventListener('OnMRecAdClickedEvent', function (adInfo) {});
+    window.addEventListener('OnMRecAdCollapsedEvent', function (adInfo) {});
+    window.addEventListener('OnMRecAdExpandedEvent', function (adInfo) {});
 
     // Banners are automatically sized to 320x50 on phones and 728x90 on tablets
     // You may use the utility method `AppLovinMAX.isTablet()` to help with view sizing adjustments
