@@ -38,9 +38,9 @@
         <header-file src="src/ios/AppLovinMAX.h" />
         <source-file src="src/ios/AppLovinMAX.m" />
         
-        <edit-config target="NSAdvertisingAttributionReportEndpoint" file="*-Info.plist" mode="merge">
+        <config-file target="*-Info.plist" parent="NSAdvertisingAttributionReportEndpoint">
             <string>https://postbacks-app.com</string>
-        </edit-config>
+        </config-file>
         
         <podspec>
           <config>
