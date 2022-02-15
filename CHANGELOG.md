@@ -1,5 +1,7 @@
 ## Versions
 
+## x.x.x
+    * Remove `NSAdvertisingAttributionReportEndpoint` from `Info.plist`.
 ## 1.0.7
     * Automatically add `NSAdvertisingAttributionReportEndpoint` to `Info.plist`.
 ## 1.0.6
