@@ -663,7 +663,7 @@ public class AppLovinMAX
             return;
         }
 
-        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMrecAdCollapsedEvent" : "OnBannerAdExpandedEvent", getAdInfo( ad ) );
+        fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdExpandedEvent" : "OnBannerAdExpandedEvent", getAdInfo( ad ) );
     }
 
     @Override

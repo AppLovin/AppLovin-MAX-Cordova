@@ -1,5 +1,7 @@
 ## Versions
 
+## x.x.x
+    * Fix "OnMRecAdExpandedEvent" not being called when MRECs are expanded.
 ## 1.0.8
     * Remove `NSAdvertisingAttributionReportEndpoint` from `Info.plist`.
 ## 1.0.7
