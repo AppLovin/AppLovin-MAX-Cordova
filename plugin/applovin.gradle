@@ -1,0 +1,6 @@
+def adReviewKey = getConfigPreference("AppLovinAdReviewKey", "abc")
+
+apply plugin: 'applovin-quality-service'
+applovin {
+    apiKey "${adReviewKey}"
+}
