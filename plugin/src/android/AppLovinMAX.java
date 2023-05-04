@@ -180,13 +180,13 @@ public class AppLovinMAX
 
         if ( genderToSet != null )
         {
-            integerToALGender( genderToSet );
+            sdk.getTargetingData().setGender( integerToALGender( genderToSet ) );
             genderToSet = null;
         }
 
         if ( maximumAdContentRatingToSet != null )
         {
-            integerToALAdContentRating( maximumAdContentRatingToSet );
+            sdk.getTargetingData().setMaximumAdContentRating( integerToALAdContentRating( maximumAdContentRatingToSet ) );
             maximumAdContentRatingToSet = null;
         }
 
@@ -1307,46 +1307,6 @@ public class AppLovinMAX
         relativeLayout.setGravity( gravity );
     }
 
-    private void integerToALGender(final Integer gender)
-    {
-        if ( gender == 0 )
-        {
-            sdk.getTargetingData().setGender( AppLovinGender.UNKNOWN );
-        }
-        else if ( gender == 1 )
-        {
-            sdk.getTargetingData().setGender( AppLovinGender.FEMALE );
-        }
-        else if ( gender == 2 )
-        {
-            sdk.getTargetingData().setGender( AppLovinGender.MALE );
-        }
-        else if ( gender == 3 )
-        {
-            sdk.getTargetingData().setGender( AppLovinGender.OTHER );
-        }
-    }
-
-    private void integerToALAdContentRating(final Integer maximumAdContentRating)
-    {
-        if ( maximumAdContentRating == 0 )
-        {
-            sdk.getTargetingData().setMaximumAdContentRating( AppLovinAdContentRating.NONE );
-        }
-        else if ( maximumAdContentRating == 1 )
-        {
-            sdk.getTargetingData().setMaximumAdContentRating( AppLovinAdContentRating.ALL_AUDIENCES );
-        }
-        else if ( maximumAdContentRating == 2 )
-        {
-            sdk.getTargetingData().setMaximumAdContentRating( AppLovinAdContentRating.EVERYONE_OVER_TWELVE );
-        }
-        else if ( maximumAdContentRating == 3 )
-        {
-            sdk.getTargetingData().setMaximumAdContentRating( AppLovinAdContentRating.MATURE_AUDIENCES );
-        }
-    }
-
     // Utility Methods
 
     private MaxAdFormat getDeviceSpecificBannerAdViewAdFormat()
@@ -1408,6 +1368,46 @@ public class AppLovinMAX
         catch ( JSONException ignored ) { }
 
         return adInfo;
+    }
+
+    private static AppLovinGender integerToALGender(final Integer gender)
+    {
+        if ( gender == 1 )
+        {
+            return AppLovinGender.FEMALE;
+        }
+        else if ( gender == 2 )
+        {
+            return AppLovinGender.MALE;
+        }
+        else if ( gender == 3 )
+        {
+            return AppLovinGender.OTHER;
+        }
+        else
+        {
+            return AppLovinGender.UNKNOWN;
+        }
+    }
+
+    private static AppLovinAdContentRating integerToALAdContentRating(final Integer maximumAdContentRating)
+    {
+        if ( maximumAdContentRating == 1 )
+        {
+            return AppLovinAdContentRating.ALL_AUDIENCES;
+        }
+        else if ( maximumAdContentRating == 2 )
+        {
+            return AppLovinAdContentRating.EVERYONE_OVER_TWELVE;
+        }
+        else if ( maximumAdContentRating == 3 )
+        {
+            return AppLovinAdContentRating.MATURE_AUDIENCES;
+        }
+        else
+        {
+            return AppLovinAdContentRating.NONE;
+        }
     }
 
     // React Native Bridge
