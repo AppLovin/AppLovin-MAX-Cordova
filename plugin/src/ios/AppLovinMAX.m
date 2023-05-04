@@ -40,6 +40,13 @@
 @property (nonatomic,   copy, nullable) NSString *userIdentifierToSet;
 @property (nonatomic, strong, nullable) NSArray<NSString *> *testDeviceIdentifiersToSet;
 @property (nonatomic, strong, nullable) NSNumber *verboseLoggingToSet;
+@property (nonatomic, strong, nullable) NSNumber *yearOfBirthToSet;
+@property (nonatomic, strong, nullable) NSNumber *genderToSet;
+@property (nonatomic, strong, nullable) NSNumber *contentRatingToSet;
+@property (nonatomic, strong, nullable) NSString *emailToSet;
+@property (nonatomic, strong, nullable) NSString *phoneNumberToSet;
+@property (nonatomic, strong, nullable) NSArray<NSString *> *keywordsToSet;
+@property (nonatomic, strong, nullable) NSArray<NSString *> *interestsToSet;
 
 // Fullscreen Ad Fields
 @property (nonatomic, strong) NSMutableDictionary<NSString *, MAInterstitialAd *> *interstitials;
@@ -139,7 +146,7 @@ static NSString *const TAG = @"AppLovinMAX";
     // Set verbose logging state if needed
     if ( self.verboseLoggingToSet )
     {
-        self.sdk.settings.isVerboseLogging = self.verboseLoggingToSet.boolValue;
+        self.sdk.settings.verboseLoggingEnabled = self.verboseLoggingToSet.boolValue;
         self.verboseLoggingToSet = nil;
     }
     
@@ -291,7 +298,7 @@ static NSString *const TAG = @"AppLovinMAX";
     
     if ( [self isPluginInitialized] )
     {
-        self.sdk.settings.isVerboseLogging = enabled;
+        self.sdk.settings.verboseLoggingEnabled = enabled;
         self.verboseLoggingToSet = nil;
     }
     else
@@ -314,6 +321,119 @@ static NSString *const TAG = @"AppLovinMAX";
     else
     {
         self.testDeviceIdentifiersToSet = testDeviceAdvertisingIds;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setYearOfBirth:(CDVInvokedUrlCommand *)command
+{
+    NSNumber *yearOfBirth = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.yearOfBirth = yearOfBirth;
+        self.yearOfBirthToSet = nil;
+    }
+    else
+    {
+        self.yearOfBirthToSet = yearOfBirth;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setGender:(CDVInvokedUrlCommand *)command
+{
+    NSNumber *gender = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.gender = [gender intValue];
+        self.genderToSet = nil;
+    }
+    else
+    {
+        self.genderToSet = gender;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setMaximumAdContentRating:(CDVInvokedUrlCommand *)command
+{
+    NSNumber *contentRating = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.maximumAdContentRating = [contentRating intValue];
+        self.contentRatingToSet = nil;
+    }
+    else
+    {
+        self.contentRatingToSet = contentRating;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setEmail:(CDVInvokedUrlCommand *)command
+{
+    NSString *email = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.email = email;
+        self.emailToSet = nil;
+    }
+    else
+    {
+        self.emailToSet = email;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setPhoneNumber:(CDVInvokedUrlCommand *)command
+{
+    NSString *phoneNumber = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.phoneNumber = phoneNumber;
+        self.phoneNumberToSet = nil;
+    }
+    else
+    {
+        self.phoneNumberToSet = phoneNumber;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+- (void)setKeywords:(CDVInvokedUrlCommand *)command
+{
+    NSArray<NSString *> *keywords = [command argumentAtIndex: 0];
+    
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.keywords = keywords;
+        self.keywordsToSet = nil;
+    }
+    else
+    {
+        self.keywordsToSet = keywords;
+    }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+-(void)setInterests:(CDVInvokedUrlCommand *)command
+{
+    NSArray<NSString *> *interests = [command argumentAtIndex: 0];
+    if ( [self isPluginInitialized] )
+    {
+        self.sdk.targetingData.interests = interests;
+        self.interestsToSet = nil;
+    }
+    else
+    {
+        self.interestsToSet = interests;
     }
     
     [self sendOKPluginResultForCommand: command];
@@ -678,16 +798,6 @@ static NSString *const TAG = @"AppLovinMAX";
     
     [self fireWindowEventWithName: ( MAAdFormat.mrec == adFormat ) ? @"OnMRecAdCollapsedEvent" : @"OnBannerAdCollapsedEvent"
                              body: [self adInfoForAd: ad]];
-}
-
-- (void)didCompleteRewardedVideoForAd:(MAAd *)ad
-{
-    // This event is not forwarded
-}
-
-- (void)didStartRewardedVideoForAd:(MAAd *)ad
-{
-    // This event is not forwarded
 }
 
 - (void)didRewardUserForAd:(MAAd *)ad withReward:(MAReward *)reward
