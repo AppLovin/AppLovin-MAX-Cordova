@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 var cordova = require('cordova');
 
-const VERSION = '1.0.9';
+const VERSION = '1.0.10';
 
 /**
  * This enum represents whether or not the consent dialog should be shown for this user.
@@ -39,7 +39,21 @@ const AdViewPosition = {
     BOTTOM_CENTER: 'bottom_center',
     BOTTOM_RIGHT: 'bottom_right',
 };
+    
+const MaximumAdContentRating = {
+    NONE: 0,
+    ALL_AUDIENCES: 1,
+    EVERYONE_OVER_TWELVE: 2,
+    MATURE_AUDIENCES: 3,
+};
 
+const Gender = {
+    UNKNOWN: 0,
+    FEMALE: 1,
+    MALE: 2,
+    OTHER: 3,
+};
+    
 function isFunction(functionObj) {
     return typeof functionObj === 'function';
 }
@@ -53,6 +67,8 @@ var AppLovinMAX = {
     ConsentDialogState,
     AdFormat,
     AdViewPosition,
+    MaximumAdContentRating,
+    Gender,
 
     // NOTE: We have to store states in JS as workaround for callback-based API
     // since Cordova does not allow for synchronous returns
@@ -145,6 +161,38 @@ var AppLovinMAX = {
 
     setTestDeviceAdvertisingIds: function (advertisingIds) {
         callNative('setTestDeviceAdvertisingIds', [advertisingIds]);
+    },
+    
+    /*----------------*/
+    /* Targeting Data */
+    /*----------------*/
+    
+    setYearOfBirth: function (yearOfBirth) {
+        callNative('setYearOfBirth', [yearOfBirth]);
+    },
+    
+    setGender: function (gender) {
+        callNative('setGender', [gender]);
+    },
+    
+    setMaximumAdContentRating: function (maximumAdContentRating) {
+        callNative('setMaximumAdContentRating', [maximumAdContentRating]);
+    },
+
+    setEmail: function (email) {
+        callNative('setEmail', [email]);
+    },
+    
+    setPhoneNumber: function (phoneNumber) {
+        callNative('setPhoneNumber', [phoneNumber]);
+    },
+    
+    setKeywords: function (keywords) {
+        callNative('setKeywords', [keywords]);
+    },
+    
+    setInterests: function (interests) {
+        callNative('setInterests', [interests]);
     },
 
     /*----------------*/

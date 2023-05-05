@@ -1,5 +1,7 @@
 ## Versions
 
+## 1.0.10
+    * Add support for targeting data. 
 ## 1.0.9
     * Fix "OnMRecAdExpandedEvent" not being called when MRECs are expanded.
 ## 1.0.8

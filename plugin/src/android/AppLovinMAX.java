@@ -27,6 +27,8 @@ import com.applovin.mediation.MaxRewardedAdListener;
 import com.applovin.mediation.ads.MaxAdView;
 import com.applovin.mediation.ads.MaxInterstitialAd;
 import com.applovin.mediation.ads.MaxRewardedAd;
+import com.applovin.sdk.AppLovinAdContentRating;
+import com.applovin.sdk.AppLovinGender;
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinPrivacySettings;
 import com.applovin.sdk.AppLovinSdk;
@@ -71,6 +73,13 @@ public class AppLovinMAX
     private String       userIdToSet;
     private List<String> testDeviceAdvertisingIdsToSet;
     private Boolean      verboseLoggingToSet;
+    private Integer      yearOfBirthToSet;
+    private Integer      genderToSet;
+    private Integer      maximumAdContentRatingToSet;
+    private String       emailToSet;
+    private String       phoneNumberToSet;
+    private List<String> keywordsToSet;
+    private List<String> interestsToSet;
 
     // Fullscreen Ad Fields
     private final Map<String, MaxInterstitialAd> mInterstitials = new HashMap<>( 2 );
@@ -162,6 +171,49 @@ public class AppLovinMAX
             verboseLoggingToSet = null;
         }
 
+        // Set targeting data if needed
+        if ( yearOfBirthToSet != null )
+        {
+            sdk.getTargetingData().setYearOfBirth( yearOfBirthToSet );
+            yearOfBirthToSet = null;
+        }
+
+        if ( genderToSet != null )
+        {
+            sdk.getTargetingData().setGender( integerToALGender( genderToSet ) );
+            genderToSet = null;
+        }
+
+        if ( maximumAdContentRatingToSet != null )
+        {
+            sdk.getTargetingData().setMaximumAdContentRating( integerToALAdContentRating( maximumAdContentRatingToSet ) );
+            maximumAdContentRatingToSet = null;
+        }
+
+        if ( emailToSet != null )
+        {
+            sdk.getTargetingData().setEmail( emailToSet );
+            emailToSet = null;
+        }
+
+        if ( phoneNumberToSet != null )
+        {
+            sdk.getTargetingData().setPhoneNumber( phoneNumberToSet );
+            phoneNumberToSet = null;
+        }
+
+        if ( keywordsToSet != null )
+        {
+            sdk.getTargetingData().setKeywords( keywordsToSet );
+            keywordsToSet = null;
+        }
+
+        if ( interestsToSet != null )
+        {
+            sdk.getTargetingData().setInterests( interestsToSet );
+            interestsToSet = null;
+        }
+
         sdk.initializeSdk( configuration -> {
             d( "SDK initialized" );
 
@@ -185,7 +237,7 @@ public class AppLovinMAX
             {
                 callbackContext.success( getInitializationMessage( context ) );
             }
-            catch ( Throwable ignored ) {}
+            catch ( Throwable ignored ) { }
         } );
     }
 
@@ -334,6 +386,113 @@ public class AppLovinMAX
         else
         {
             testDeviceAdvertisingIdsToSet = advertisingIds;
+        }
+
+        callbackContext.success();
+    }
+
+    // TARGETING DATA
+
+    public void setYearOfBirth(final Integer yearOfBirth, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            sdk.getTargetingData().setYearOfBirth( yearOfBirth );
+            yearOfBirthToSet = null;
+        }
+        else
+        {
+            yearOfBirthToSet = yearOfBirth;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setGender(final Integer gender, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            integerToALGender( gender );
+            genderToSet = null;
+        }
+        else
+        {
+            genderToSet = gender;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setMaximumAdContentRating(final Integer maximumAdContentRating, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            integerToALAdContentRating( maximumAdContentRating );
+            genderToSet = null;
+        }
+        else
+        {
+            maximumAdContentRatingToSet = maximumAdContentRating;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setEmail(final String email, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            sdk.getTargetingData().setEmail( email );
+            emailToSet = null;
+        }
+        else
+        {
+            emailToSet = email;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setPhoneNumber(final String phoneNumber, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            sdk.getTargetingData().setPhoneNumber( phoneNumber );
+            phoneNumberToSet = null;
+        }
+        else
+        {
+            phoneNumberToSet = phoneNumber;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setKeywords(final List<String> keywords, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            sdk.getTargetingData().setKeywords( keywords );
+            keywordsToSet = null;
+        }
+        else
+        {
+            keywordsToSet = keywords;
+        }
+
+        callbackContext.success();
+    }
+
+    public void setInterests(final List<String> interests, final CallbackContext callbackContext)
+    {
+        if ( isPluginInitialized )
+        {
+            sdk.getTargetingData().setInterests( interests );
+            interestsToSet = null;
+        }
+        else
+        {
+            interestsToSet = interests;
         }
 
         callbackContext.success();
@@ -1211,6 +1370,46 @@ public class AppLovinMAX
         return adInfo;
     }
 
+    private static AppLovinGender integerToALGender(final Integer gender)
+    {
+        if ( gender == 1 )
+        {
+            return AppLovinGender.FEMALE;
+        }
+        else if ( gender == 2 )
+        {
+            return AppLovinGender.MALE;
+        }
+        else if ( gender == 3 )
+        {
+            return AppLovinGender.OTHER;
+        }
+        else
+        {
+            return AppLovinGender.UNKNOWN;
+        }
+    }
+
+    private static AppLovinAdContentRating integerToALAdContentRating(final Integer maximumAdContentRating)
+    {
+        if ( maximumAdContentRating == 1 )
+        {
+            return AppLovinAdContentRating.ALL_AUDIENCES;
+        }
+        else if ( maximumAdContentRating == 2 )
+        {
+            return AppLovinAdContentRating.EVERYONE_OVER_TWELVE;
+        }
+        else if ( maximumAdContentRating == 3 )
+        {
+            return AppLovinAdContentRating.MATURE_AUDIENCES;
+        }
+        else
+        {
+            return AppLovinAdContentRating.NONE;
+        }
+    }
+
     // React Native Bridge
 
     private void fireWindowEvent(final String name, final JSONObject params)
@@ -1288,6 +1487,55 @@ public class AppLovinMAX
             }
 
             setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsList, callbackContext );
+        }
+        else if ( "setYearOfBirth".equalsIgnoreCase( action ) )
+        {
+            Integer yearOfBirth = args.getInt( 0 );
+            setYearOfBirth( yearOfBirth, callbackContext );
+        }
+        else if ( "setGender".equalsIgnoreCase( action ) )
+        {
+            Integer gender = args.getInt( 0 );
+            setGender( gender, callbackContext );
+        }
+        else if ( "setMaximumAdContentRating".equalsIgnoreCase( action ) )
+        {
+            Integer adContentRating = args.getInt( 0 );
+            setMaximumAdContentRating( adContentRating, callbackContext );
+        }
+        else if ( "setEmail".equalsIgnoreCase( action ) )
+        {
+            String email = args.getString( 0 );
+            setEmail( email, callbackContext );
+        }
+        else if ( "setPhoneNumber".equalsIgnoreCase( action ) )
+        {
+            String phoneNumber = args.getString( 0 );
+            setPhoneNumber( phoneNumber, callbackContext );
+        }
+        else if ( "setKeywords".equalsIgnoreCase( action ) )
+        {
+            JSONArray keywords = args.getJSONArray( 0 );
+            List<String> keywordsList = new ArrayList<>( keywords.length() );
+
+            for ( int i = 0; i < keywords.length(); i++ )
+            {
+                keywordsList.add( keywords.getString( 0 ) );
+            }
+
+            setKeywords( keywordsList, callbackContext );
+        }
+        else if ( "setInterests".equalsIgnoreCase( action ) )
+        {
+            JSONArray interests = args.getJSONArray( 0 );
+            List<String> interestsList = new ArrayList<>( interests.length() );
+
+            for ( int i = 0; i < interests.length(); i++ )
+            {
+                interestsList.add( interests.getString( 0 ) );
+            }
+
+            setInterests( interestsList, callbackContext );
         }
         else if ( "trackEvent".equalsIgnoreCase( action ) )
         {
