@@ -374,7 +374,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setEmail:(CDVInvokedUrlCommand *)command
+- (void)setEmail:(CDVInvokedUrlCommand *)command
 {
     NSString *email = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
