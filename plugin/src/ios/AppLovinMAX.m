@@ -329,6 +329,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setYearOfBirth:(CDVInvokedUrlCommand *)command
 {
     NSNumber *yearOfBirth = [command argumentAtIndex: 0];
+
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.yearOfBirth = yearOfBirth;
@@ -345,6 +346,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setGender:(CDVInvokedUrlCommand *)command
 {
     NSNumber *gender = [command argumentAtIndex: 0];
+
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.gender = [gender intValue];
@@ -361,6 +363,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setMaximumAdContentRating:(CDVInvokedUrlCommand *)command
 {
     NSNumber *contentRating = [command argumentAtIndex: 0];
+
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.maximumAdContentRating = [contentRating intValue];
@@ -377,6 +380,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setEmail:(CDVInvokedUrlCommand *)command
 {
     NSString *email = [command argumentAtIndex: 0];
+
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.email = email;
@@ -393,6 +397,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setPhoneNumber:(CDVInvokedUrlCommand *)command
 {
     NSString *phoneNumber = [command argumentAtIndex: 0];
+
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.phoneNumber = phoneNumber;
@@ -426,6 +431,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setInterests:(CDVInvokedUrlCommand *)command
 {
     NSArray<NSString *> *interests = [command argumentAtIndex: 0];
+    
     if ( [self isPluginInitialized] )
     {
         self.sdk.targetingData.interests = interests;
