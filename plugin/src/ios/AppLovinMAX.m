@@ -342,7 +342,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setGender:(CDVInvokedUrlCommand *)command
+- (void)setGender:(CDVInvokedUrlCommand *)command
 {
     NSNumber *gender = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
