@@ -358,7 +358,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setMaximumAdContentRating:(CDVInvokedUrlCommand *)command
+- (void)setMaximumAdContentRating:(CDVInvokedUrlCommand *)command
 {
     NSNumber *contentRating = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
