@@ -390,7 +390,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setPhoneNumber:(CDVInvokedUrlCommand *)command
+- (void)setPhoneNumber:(CDVInvokedUrlCommand *)command
 {
     NSString *phoneNumber = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
