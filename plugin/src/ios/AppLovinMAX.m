@@ -423,7 +423,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setInterests:(CDVInvokedUrlCommand *)command
+- (void)setInterests:(CDVInvokedUrlCommand *)command
 {
     NSArray<NSString *> *interests = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
