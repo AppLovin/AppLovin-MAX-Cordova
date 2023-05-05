@@ -326,7 +326,7 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
--(void)setYearOfBirth:(CDVInvokedUrlCommand *)command
+- (void)setYearOfBirth:(CDVInvokedUrlCommand *)command
 {
     NSNumber *yearOfBirth = [command argumentAtIndex: 0];
     if ( [self isPluginInitialized] )
