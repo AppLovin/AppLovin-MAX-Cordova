@@ -498,13 +498,6 @@ public class AppLovinMAX
         callbackContext.success();
     }
 
-    public void clearAllTargetingData(final CallbackContext callbackContext)
-    {
-        sdk.getTargetingData().clearAll();
-
-        callbackContext.success();
-    };
-
     // EVENT TRACKING
 
     public void trackEvent(final String event, final JSONObject parameters, final CallbackContext callbackContext) throws JSONException
@@ -1543,10 +1536,6 @@ public class AppLovinMAX
             }
 
             setInterests( interestsList, callbackContext );
-        }
-        else if ( "clearAllTargetingData".equalsIgnoreCase( action ) )
-        {
-            clearAllTargetingData( callbackContext );
         }
         else if ( "trackEvent".equalsIgnoreCase( action ) )
         {
