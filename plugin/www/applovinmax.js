@@ -195,6 +195,10 @@ var AppLovinMAX = {
         callNative('setInterests', [interests]);
     },
 
+    clearAllTargetingData: function () {
+        callNative('clearAllTargetingData');
+    },
+
     /*----------------*/
     /* EVENT TRACKING */
     /*----------------*/
