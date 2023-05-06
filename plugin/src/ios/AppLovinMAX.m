@@ -195,7 +195,7 @@ static NSString *const TAG = @"AppLovinMAX";
 {
     if ( !_sdk )
     {
-        [self log: @"Failed to show mediation debugger - please ensure the AppLovin MAX Unity Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!"];
+        [self log: @"Failed to show mediation debugger - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!"];
         [self sendErrorPluginResultForCommand: command];
         
         return;
@@ -441,6 +441,21 @@ static NSString *const TAG = @"AppLovinMAX";
     {
         self.interestsToSet = interests;
     }
+    
+    [self sendOKPluginResultForCommand: command];
+}
+
+- (void)clearAllTargetingData:(CDVInvokedUrlCommand *)command
+{
+    if ( !_sdk )
+    {
+        [self log: @"Failed to clear targeting data - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!"];
+        [self sendErrorPluginResultForCommand: command];
+        
+        return;
+    }
+    
+    [self.sdk.targetingData clearAll];
     
     [self sendOKPluginResultForCommand: command];
 }
