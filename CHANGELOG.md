@@ -1,7 +1,7 @@
 ## Versions
 
 ## x.x.x
-    * Add support for clearing all target data. 
+    * Add support for clearing all targeting data. 
 ## 1.0.10
     * Add support for targeting data. 
 ## 1.0.9
