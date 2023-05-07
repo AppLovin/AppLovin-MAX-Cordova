@@ -498,6 +498,19 @@ public class AppLovinMAX
         callbackContext.success();
     }
 
+    public void clearAllTargetingData(final CallbackContext callbackContext)
+    {
+        if ( sdk == null )
+        {
+            Log.e( "[" + TAG + "]", "Failed to clear targeting data - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!" );
+            return;
+        }
+
+        sdk.getTargetingData().clearAll();
+
+        callbackContext.success();
+    }
+
     // EVENT TRACKING
 
     public void trackEvent(final String event, final JSONObject parameters, final CallbackContext callbackContext) throws JSONException
@@ -1536,6 +1549,10 @@ public class AppLovinMAX
             }
 
             setInterests( interestsList, callbackContext );
+        }
+        else if ( "clearAllTargetingData".equalsIgnoreCase( action ) )
+        {
+            clearAllTargetingData( callbackContext );
         }
         else if ( "trackEvent".equalsIgnoreCase( action ) )
         {
