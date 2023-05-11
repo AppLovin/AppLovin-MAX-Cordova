@@ -1,5 +1,7 @@
 ## Versions
 
+## x.x.x
+    * Fix `plugins.xml` using a deprecated CocoaPods repository.
 ## 1.1.0
     * Add support for clearing all targeting data. 
 ## 1.0.10

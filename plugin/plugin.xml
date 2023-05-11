@@ -40,7 +40,6 @@
 
         <podspec>
           <config>
-            <source url="https://github.com/AppLovin/Public-CocoaPods-Specs" />
             <source url="https://github.com/CocoaPods/Specs.git"/>
           </config>
           <pods use-frameworks="true">
