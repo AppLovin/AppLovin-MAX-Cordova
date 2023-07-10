@@ -281,7 +281,7 @@ var AppLovinMAX = {
         callNative('hideMRec', [adUnitId]);
     },
 
-    destroyMRec: function () {
+    destroyMRec: function (adUnitId) {
         callNative('destroyMRec', [adUnitId]);
     },
 

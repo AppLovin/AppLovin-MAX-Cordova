@@ -1,5 +1,7 @@
 ## Versions
 
+## 1.1.2
+    * Fix `destroyMRec` API by adding the missing argument.
 ## 1.1.1
     * Fix `plugins.xml` using a deprecated CocoaPods repository.
 ## 1.1.0
