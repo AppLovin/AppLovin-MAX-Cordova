@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 var cordova = require('cordova');
 
-const VERSION = '1.1.1';
+const VERSION = '1.1.2';
 
 /**
  * This enum represents whether or not the consent dialog should be shown for this user.
