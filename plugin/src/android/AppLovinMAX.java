@@ -50,6 +50,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import androidx.annotation.Nullable;
+
 import static org.apache.cordova.PluginResult.Status.ERROR;
 import static org.apache.cordova.PluginResult.Status.OK;
 
@@ -975,7 +977,7 @@ public class AppLovinMAX
         } );
     }
 
-    private void showAdView(final String adUnitId, final MaxAdFormat adFormat, final CallbackContext callbackContext)
+    private void showAdView(final String adUnitId, final MaxAdFormat adFormat, @Nullable final CallbackContext callbackContext)
     {
         getCurrentActivity().runOnUiThread( () -> {
 
@@ -994,7 +996,10 @@ public class AppLovinMAX
             adView.setVisibility( View.VISIBLE );
             adView.startAutoRefresh();
 
-            callbackContext.success();
+            if ( callbackContext != null )
+            {
+                callbackContext.success();
+            }
         } );
     }
 
