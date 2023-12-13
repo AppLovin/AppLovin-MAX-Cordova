@@ -923,11 +923,12 @@ public class AppLovinMAX
             // The publisher may have requested to show the banner before it was created. Now that the banner is created, show it.
             if ( mAdUnitIdsToShowAfterCreate.contains( adUnitId ) )
             {
-                showAdView( adUnitId, adFormat, null );
                 mAdUnitIdsToShowAfterCreate.remove( adUnitId );
+                showAdView( adUnitId, adFormat, callbackContext );
+                
+            } else {
+                callbackContext.success();
             }
-
-            callbackContext.success();
         } );
     }
 
