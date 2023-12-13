@@ -1,6 +1,6 @@
 ## Versions
 
-## x.x.x
+## 1.1.3
     * Fix NPE if the integration attempts to show a banner before it is created.
 ## 1.1.2
     * Fix `destroyMRec` API by adding the missing argument.

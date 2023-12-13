@@ -1,6 +1,6 @@
 {
   "name": "cordova-plugin-applovin-max",
-  "version": "1.1.2",
+  "version": "1.1.3",
   "description": "AppLovin MAX Cordova Plugin for Android and iOS",
   "cordova": {
     "id": "cordova-plugin-applovin-max",
