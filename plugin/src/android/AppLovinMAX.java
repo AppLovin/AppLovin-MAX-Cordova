@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
-import android.view.OrientationEventListener;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
@@ -221,19 +220,6 @@ public class AppLovinMAX
 
             sdkConfiguration = configuration;
             isSdkInitialized = true;
-
-            // Enable orientation change listener, so that the position can be updated for vertical banners.
-            new OrientationEventListener( getCurrentActivity() )
-            {
-                @Override
-                public void onOrientationChanged(final int orientation)
-                {
-                    for ( final Map.Entry<String, MaxAdFormat> adUnitFormats : mVerticalAdViewFormats.entrySet() )
-                    {
-                        positionAdView( adUnitFormats.getKey(), adUnitFormats.getValue() );
-                    }
-                }
-            }.enable();
 
             try
             {
