@@ -1,6 +1,6 @@
 ## Versions
 
-## x.x.x
+## 1.1.4
     * Attempt fix at increased CPU usage on app pause on Android. https://github.com/AppLovin/AppLovin-MAX-Cordova/issues/44
 ## 1.1.3
     * Fix NPE if the integration attempts to show a banner before it is created.
