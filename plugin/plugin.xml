@@ -22,8 +22,9 @@
         </config-file>
 
         <source-file src="src/android/AppLovinMAX.java" target-dir="src/com/applovin/cordova" />
-        
-        <framework src="com.applovin:applovin-sdk:+" />
+        <!-- default value: + -->
+        <preference name="SDK_VERSION" default="+" />
+        <framework src="com.applovin:applovin-sdk:$SDK_VERSION" />
     </platform>
 
     <!-- ios -->
