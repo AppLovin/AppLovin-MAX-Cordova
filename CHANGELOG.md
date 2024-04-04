@@ -1,6 +1,6 @@
 ## Versions
 
-## x.x.x
+## 1.1.5
     * Depends on Android SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_12_3_1) and iOS SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_12_3_1).
 ## 1.1.4
     * Attempt fix at increased CPU usage on app pause on Android. https://github.com/AppLovin/AppLovin-MAX-Cordova/issues/44
