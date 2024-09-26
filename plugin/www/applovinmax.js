@@ -366,6 +366,9 @@ window.addEventListener('OnRewardedAdDisplayedEvent', function (adInfo) {
 window.addEventListener('OnRewardedAdFailedToDisplayEvent', function (adInfo) {
     AppLovinMAX.isAdReadyValues[adInfo.adUnitId] = false;
 });
+window.addEventListener('OnRewardedAdReceivedRewardEvent', function (adInfo) {
+    AppLovinMAX.isAdReadyValues[adInfo.adUnitId] = true;
+});
 
 if (typeof module !== undefined && module.exports) {
     module.exports = AppLovinMAX;
