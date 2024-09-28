@@ -367,7 +367,7 @@ window.addEventListener('OnRewardedAdFailedToDisplayEvent', function (adInfo) {
     AppLovinMAX.isAdReadyValues[adInfo.adUnitId] = false;
 });
 window.addEventListener('OnRewardedAdReceivedRewardEvent', function (adInfo) {
-    AppLovinMAX.isAdReadyValues[adInfo.adUnitId] = true;
+    AppLovinMAX.isAdReadyValues[adInfo.adUnitId] = false;
 });
 
 if (typeof module !== undefined && module.exports) {
