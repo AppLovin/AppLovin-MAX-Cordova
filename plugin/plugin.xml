@@ -43,7 +43,7 @@
             <source url="https://github.com/CocoaPods/Specs.git"/>
           </config>
           <pods use-frameworks="true">
-            <pod name="AppLovinSDK" spec="12.3.1" />/>
+            <pod name="AppLovinSDK" spec="12.4.1" />
           </pods>
         </podspec>
     </platform>
