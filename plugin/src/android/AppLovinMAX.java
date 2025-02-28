@@ -26,14 +26,13 @@ import com.applovin.mediation.MaxRewardedAdListener;
 import com.applovin.mediation.ads.MaxAdView;
 import com.applovin.mediation.ads.MaxInterstitialAd;
 import com.applovin.mediation.ads.MaxRewardedAd;
-import com.applovin.sdk.AppLovinAdContentRating;
-import com.applovin.sdk.AppLovinGender;
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinPrivacySettings;
 import com.applovin.sdk.AppLovinSdk;
 import com.applovin.sdk.AppLovinSdkConfiguration;
 import com.applovin.sdk.AppLovinSdkSettings;
 import com.applovin.sdk.AppLovinSdkUtils;
+ 
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaInterface;
@@ -175,43 +174,71 @@ public class AppLovinMAX
         // Set targeting data if needed
         if ( yearOfBirthToSet != null )
         {
-            sdk.getTargetingData().setYearOfBirth( yearOfBirthToSet );
+            //sdk.getTargetingData().setYearOfBirth( yearOfBirthToSet );
             yearOfBirthToSet = null;
         }
 
         if ( genderToSet != null )
         {
-            sdk.getTargetingData().setGender( integerToALGender( genderToSet ) );
+          //  MaxTargetingData targetingData = sdk.getTargetingData();
+            // switch(genderToSet) {
+            //     case 0:
+            //         targetingData.setGender(MaxTargetingData.GENDER_UNKNOWN);
+            //         break;
+            //     case 1:
+            //         targetingData.setGender(MaxTargetingData.GENDER_FEMALE);
+            //         break;
+            //     case 2:
+            //         targetingData.setGender(MaxTargetingData.GENDER_MALE);
+            //         break;
+            //     case 3:
+            //         targetingData.setGender(MaxTargetingData.GENDER_OTHER);
+            //         break;
+            // }
             genderToSet = null;
         }
 
         if ( maximumAdContentRatingToSet != null )
         {
-            sdk.getTargetingData().setMaximumAdContentRating( integerToALAdContentRating( maximumAdContentRatingToSet ) );
+            //MaxTargetingData targetingData = sdk.getTargetingData();
+            // switch(maximumAdContentRatingToSet) {
+            //     case 0:
+            //         targetingData.setMaximumAdContentRating(MaxTargetingData.MAX_CONTENT_RATING_NONE);
+            //         break;
+            //     case 1:
+            //         targetingData.setMaximumAdContentRating(MaxTargetingData.MAX_CONTENT_RATING_ALL_AUDIENCES);
+            //         break;
+            //     case 2:
+            //         targetingData.setMaximumAdContentRating(MaxTargetingData.MAX_CONTENT_RATING_EVERYONE_OVER_TWELVE);
+            //         break;
+            //     case 3:
+            //         targetingData.setMaximumAdContentRating(MaxTargetingData.MAX_CONTENT_RATING_MATURE_AUDIENCES);
+            //         break;
+            // }
             maximumAdContentRatingToSet = null;
         }
 
         if ( emailToSet != null )
         {
-            sdk.getTargetingData().setEmail( emailToSet );
+            //sdk.getTargetingData().setEmail( emailToSet );
             emailToSet = null;
         }
 
         if ( phoneNumberToSet != null )
         {
-            sdk.getTargetingData().setPhoneNumber( phoneNumberToSet );
+        //    sdk.getTargetingData().setPhoneNumber( phoneNumberToSet );
             phoneNumberToSet = null;
         }
 
         if ( keywordsToSet != null )
         {
-            sdk.getTargetingData().setKeywords( keywordsToSet );
+           // sdk.getTargetingData().setKeywords( keywordsToSet );
             keywordsToSet = null;
         }
 
         if ( interestsToSet != null )
         {
-            sdk.getTargetingData().setInterests( interestsToSet );
+            //sdk.getTargetingData().setInterests( interestsToSet );
             interestsToSet = null;
         }
 
@@ -244,7 +271,7 @@ public class AppLovinMAX
         }
 
         message.put( "hasUserConsent", AppLovinPrivacySettings.hasUserConsent( context ) );
-        message.put( "isAgeRestrictedUser", AppLovinPrivacySettings.isAgeRestrictedUser( context ) );
+      //  message.put( "isAgeRestrictedUser", AppLovinPrivacySettings.isAgeRestrictedUser( context ) );
         message.put( "isDoNotSell", AppLovinPrivacySettings.isDoNotSell( context ) );
         message.put( "isTablet", AppLovinSdkUtils.isTablet( context ) );
 
@@ -299,14 +326,14 @@ public class AppLovinMAX
 
     public void setIsAgeRestrictedUser(final boolean isAgeRestrictedUser, final CallbackContext callbackContext)
     {
-        AppLovinPrivacySettings.setIsAgeRestrictedUser( isAgeRestrictedUser, getCurrentActivity() );
+     //   AppLovinPrivacySettings.setIsAgeRestrictedUser( isAgeRestrictedUser, getCurrentActivity() );
         callbackContext.success();
     }
 
     public void isAgeRestrictedUser(final CallbackContext callbackContext)
     {
-        PluginResult result = new PluginResult( OK, AppLovinPrivacySettings.isAgeRestrictedUser( getCurrentActivity() ) );
-        callbackContext.sendPluginResult( result );
+       // PluginResult result = new PluginResult( OK, AppLovinPrivacySettings.isAgeRestrictedUser( getCurrentActivity() ) );
+       // callbackContext.sendPluginResult( result );
     }
 
     public void setDoNotSell(final boolean doNotSell, final CallbackContext callbackContext)
@@ -385,7 +412,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setYearOfBirth( yearOfBirth );
+          //  sdk.getTargetingData().setYearOfBirth( yearOfBirth );
             yearOfBirthToSet = null;
         }
         else
@@ -400,7 +427,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            integerToALGender( gender );
+            // integerToALGender( gender );
             genderToSet = null;
         }
         else
@@ -415,7 +442,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            integerToALAdContentRating( maximumAdContentRating );
+            // integerToALAdContentRating( maximumAdContentRating );
             genderToSet = null;
         }
         else
@@ -430,7 +457,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setEmail( email );
+         //   sdk.getTargetingData().setEmail( email );
             emailToSet = null;
         }
         else
@@ -445,7 +472,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setPhoneNumber( phoneNumber );
+        //    sdk.getTargetingData().setPhoneNumber( phoneNumber );
             phoneNumberToSet = null;
         }
         else
@@ -460,7 +487,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setKeywords( keywords );
+         //   sdk.getTargetingData().setKeywords( keywords );
             keywordsToSet = null;
         }
         else
@@ -475,7 +502,7 @@ public class AppLovinMAX
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setInterests( interests );
+           // sdk.getTargetingData().setInterests( interests );
             interestsToSet = null;
         }
         else
@@ -494,7 +521,7 @@ public class AppLovinMAX
             return;
         }
 
-        sdk.getTargetingData().clearAll();
+        //sdk.getTargetingData().clearAll();
 
         callbackContext.success();
     }
@@ -839,17 +866,17 @@ public class AppLovinMAX
         fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", getAdInfo( ad ) );
     }
 
-    @Override
-    public void onRewardedVideoCompleted(final MaxAd ad)
-    {
-        // This event is not forwarded
-    }
+    // @Override
+    // public void onRewardedVideoCompleted(final MaxAd ad)
+    // {
+    //     // This event is not forwarded
+    // }
 
-    @Override
-    public void onRewardedVideoStarted(final MaxAd ad)
-    {
-        // This event is not forwarded
-    }
+    // @Override
+    // public void onRewardedVideoStarted(final MaxAd ad)
+    // {
+    //     // This event is not forwarded
+    // }
 
     @Override
     public void onUserRewarded(final MaxAd ad, final MaxReward reward)
@@ -1374,45 +1401,7 @@ public class AppLovinMAX
         return adInfo;
     }
 
-    private static AppLovinGender integerToALGender(final Integer gender)
-    {
-        if ( gender == 1 )
-        {
-            return AppLovinGender.FEMALE;
-        }
-        else if ( gender == 2 )
-        {
-            return AppLovinGender.MALE;
-        }
-        else if ( gender == 3 )
-        {
-            return AppLovinGender.OTHER;
-        }
-        else
-        {
-            return AppLovinGender.UNKNOWN;
-        }
-    }
-
-    private static AppLovinAdContentRating integerToALAdContentRating(final Integer maximumAdContentRating)
-    {
-        if ( maximumAdContentRating == 1 )
-        {
-            return AppLovinAdContentRating.ALL_AUDIENCES;
-        }
-        else if ( maximumAdContentRating == 2 )
-        {
-            return AppLovinAdContentRating.EVERYONE_OVER_TWELVE;
-        }
-        else if ( maximumAdContentRating == 3 )
-        {
-            return AppLovinAdContentRating.MATURE_AUDIENCES;
-        }
-        else
-        {
-            return AppLovinAdContentRating.NONE;
-        }
-    }
+  
 
     // React Native Bridge
 
@@ -1450,11 +1439,11 @@ public class AppLovinMAX
         else if ( "setIsAgeRestrictedUser".equalsIgnoreCase( action ) )
         {
             boolean isAgeRestrictedUser = args.getBoolean( 0 );
-            setIsAgeRestrictedUser( isAgeRestrictedUser, callbackContext );
+           // setIsAgeRestrictedUser( isAgeRestrictedUser, callbackContext );
         }
         else if ( "isAgeRestrictedUser".equalsIgnoreCase( action ) )
         {
-            isAgeRestrictedUser( callbackContext );
+            //isAgeRestrictedUser( callbackContext );
         }
         else if ( "setDoNotSell".equalsIgnoreCase( action ) )
         {

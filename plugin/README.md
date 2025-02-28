@@ -3,7 +3,7 @@
 AppLovin MAX Cordova Plugin for Android and iOS.
 
 ## Documentation
-Check out our integration docs [here](https://developers.applovin.com/en/cordova/overview/integration).
+Check out our integration docs [here](https://dash.applovin.com/documentation/mediation/cordova/getting-started/integration).
 
 ## License
 MIT
