@@ -124,22 +124,22 @@ static NSString *const TAG = @"AppLovinMAX";
         }
     }
 
-    // Initialize SDK
-    self.sdk = [ALSdk sharedWithKey: sdkKey];
-    [self.sdk setPluginVersion: [@"Cordova-" stringByAppendingString: pluginVersion]];
-    [self.sdk setMediationProvider: ALMediationProviderMAX];
+   // Initialize SDK
+   self.sdk = [ALSdk sharedWithKey: sdkKey];
+   [self.sdk setPluginVersion: [@"Cordova-" stringByAppendingString: pluginVersion]];
+   [self.sdk setMediationProvider: ALMediationProviderMAX];
 
-    // Set user id if needed
+   // Set user id if needed
     if ( [self.userIdentifierToSet al_isValidString] )
     {
-        self.sdk.userIdentifier = self.userIdentifierToSet;
+        // self.sdk.userIdentifier = self.userIdentifierToSet;
         self.userIdentifierToSet = nil;
     }
 
     // Set test device ids if needed
     if ( self.testDeviceIdentifiersToSet )
     {
-        self.sdk.settings.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
+      //   self.sdk.settings.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
         self.testDeviceIdentifiersToSet = nil;
     }
 
@@ -150,16 +150,16 @@ static NSString *const TAG = @"AppLovinMAX";
         self.verboseLoggingToSet = nil;
     }
 
-    [self.sdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration *configuration)
-     {
-        [self log: @"SDK initialized"];
+    // [self.sdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration *configuration)
+    //  {
+    //     [self log: @"SDK initialized"];
 
-        self.sdkConfiguration = configuration;
-        self.sdkInitialized = YES;
+    //     self.sdkConfiguration = configuration;
+    //     self.sdkInitialized = YES;
 
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsDictionary: [self initializationMessage]];
-        [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-    }];
+    //     CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK messageAsDictionary: [self initializationMessage]];
+    //     [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
+    // }];
 }
 
 - (NSDictionary<NSString *, id> *)initializationMessage
@@ -168,12 +168,12 @@ static NSString *const TAG = @"AppLovinMAX";
 
     if ( self.sdkConfiguration )
     {
-        message[@"consentDialogState"] = @(self.sdkConfiguration.consentDialogState);
+      //  message[@"consentDialogState"] = @(self.sdkConfiguration.consentDialogState);
         message[@"countryCode"] = self.sdkConfiguration.countryCode;
     }
     else
     {
-        message[@"consentDialogState"] = @(ALConsentDialogStateUnknown);
+      //  message[@"consentDialogState"] = @(ALConsentDialogStateUnknown);
     }
 
     message[@"hasUserConsent"] = @([ALPrivacySettings hasUserConsent]);
@@ -206,21 +206,21 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
-- (void/*BOOL*/)getConsentDialogState:(CDVInvokedUrlCommand *)command
-{
-    if ( ![self isInitialized] )
-    {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
-                                                 messageAsNSInteger: ALConsentDialogStateUnknown];
-        [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
+// - (void/*BOOL*/)getConsentDialogState:(CDVInvokedUrlCommand *)command
+// {
+//     if ( ![self isInitialized] )
+//     {
+//         CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
+//                                                  messageAsNSInteger: ALConsentDialogStateUnknown];
+//         [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
 
-        return;
-    }
+//         return;
+//     }
 
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                             messageAsNSInteger: self.sdkConfiguration.consentDialogState];
-    [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-}
+//     // CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
+//                                         //     messageAsNSInteger: self.sdkConfiguration.consentDialogState];
+//     [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
+// }
 
 - (void)setHasUserConsent:(CDVInvokedUrlCommand *)command
 {
@@ -267,7 +267,7 @@ static NSString *const TAG = @"AppLovinMAX";
 
     if ( [self isPluginInitialized] )
     {
-        self.sdk.userIdentifier = userId;
+       // self.sdk.userIdentifier = userId;
         self.userIdentifierToSet = nil;
     }
     else
@@ -328,7 +328,7 @@ static NSString *const TAG = @"AppLovinMAX";
 
 - (void)setYearOfBirth:(CDVInvokedUrlCommand *)command
 {
-    NSNumber *yearOfBirth = [command argumentAtIndex: 0];
+  //  NSNumber *yearOfBirth = [command argumentAtIndex: 0];
 
     if ( [self isPluginInitialized] )
     {
