@@ -3,27 +3,6 @@ var cordova = require('cordova');
 
 const VERSION = '1.1.5';
 
-/**
- * This enum represents whether or not the consent dialog should be shown for this user.
- * The state where no such determination could be made is represented by `Unknown`.
- */
-const ConsentDialogState = {
-    /**
-     * The consent dialog state could not be determined. This is likely due to SDK failing to initialize.
-     */
-    UNKNOWN: 0,
-
-    /**
-     * This user should be shown a consent dialog.
-     */
-    APPLIES: 1,
-
-    /**
-     * This user should not be shown a consent dialog.
-     */
-    DOES_NOT_APPLY: 2,
-};
-
 const AdFormat = {
     BANNER: 'banner',
     MREC: 'mrec',
@@ -39,21 +18,7 @@ const AdViewPosition = {
     BOTTOM_CENTER: 'bottom_center',
     BOTTOM_RIGHT: 'bottom_right',
 };
-    
-const MaximumAdContentRating = {
-    NONE: 0,
-    ALL_AUDIENCES: 1,
-    EVERYONE_OVER_TWELVE: 2,
-    MATURE_AUDIENCES: 3,
-};
 
-const Gender = {
-    UNKNOWN: 0,
-    FEMALE: 1,
-    MALE: 2,
-    OTHER: 3,
-};
-    
 function isFunction(functionObj) {
     return typeof functionObj === 'function';
 }
@@ -64,11 +29,8 @@ function callNative(name, params = [], successCallback = null, errorCallback = n
 
 var AppLovinMAX = {
     VERSION,
-    ConsentDialogState,
     AdFormat,
     AdViewPosition,
-    MaximumAdContentRating,
-    Gender,
 
     // NOTE: We have to store states in JS as workaround for callback-based API
     // since Cordova does not allow for synchronous returns
@@ -107,11 +69,6 @@ var AppLovinMAX = {
     /* PRIVACY APIs */
     /*--------------*/
 
-    getConsentDialogState: function (callback) {
-        // Always call native as state might change from UNKNOWN
-        callNative('getConsentDialogState', [], callback);
-    },
-
     setHasUserConsent: function (hasUserConsent) {
         this.hasUserConsentValue = hasUserConsent;
         callNative('setHasUserConsent', [hasUserConsent]);
@@ -119,15 +76,6 @@ var AppLovinMAX = {
 
     hasUserConsent: function () {
         return this.hasUserConsentValue;
-    },
-
-    setIsAgeRestrictedUser: function (isAgeRestrictedUser) {
-        this.isAgeRestrictedUserValue = isAgeRestrictedUser;
-        callNative('setIsAgeRestrictedUser', [isAgeRestrictedUser]);
-    },
-
-    isAgeRestrictedUser: function () {
-        return this.isAgeRestrictedUserValue;
     },
 
     setDoNotSell: function (isDoNotSell) {
@@ -162,41 +110,13 @@ var AppLovinMAX = {
     setTestDeviceAdvertisingIds: function (advertisingIds) {
         callNative('setTestDeviceAdvertisingIds', [advertisingIds]);
     },
-    
-    /*----------------*/
-    /* Targeting Data */
-    /*----------------*/
-    
-    setYearOfBirth: function (yearOfBirth) {
-        callNative('setYearOfBirth', [yearOfBirth]);
-    },
-    
-    setGender: function (gender) {
-        callNative('setGender', [gender]);
-    },
-    
-    setMaximumAdContentRating: function (maximumAdContentRating) {
-        callNative('setMaximumAdContentRating', [maximumAdContentRating]);
-    },
 
-    setEmail: function (email) {
-        callNative('setEmail', [email]);
-    },
-    
-    setPhoneNumber: function (phoneNumber) {
-        callNative('setPhoneNumber', [phoneNumber]);
-    },
-    
-    setKeywords: function (keywords) {
-        callNative('setKeywords', [keywords]);
-    },
-    
-    setInterests: function (interests) {
-        callNative('setInterests', [interests]);
-    },
+    /*-------------------*/
+    /* SEGMENT TARGETING */
+    /*-------------------*/
 
-    clearAllTargetingData: function () {
-        callNative('clearAllTargetingData');
+    addSegment: function (key, values) {
+       callNative('addSegment', [key, values]);
     },
 
     /*----------------*/

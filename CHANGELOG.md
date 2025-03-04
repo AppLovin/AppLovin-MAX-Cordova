@@ -1,5 +1,10 @@
 ## Versions
 
+## x.x.x
+    * Depend on Android SDK 13.1.0 and iOS SDK 13.1.0.
+    * Replace deprecated `Targeting Data` APIs with `Segment Targeting`.
+    * Remove deprecated `ConsentDialogState` APIs.
+    * Remove deprecated `isAgeRestrictedUser` APIs.
 ## 1.1.5
     * Depends on Android SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_12_3_1) and iOS SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_12_3_1).
 ## 1.1.4
