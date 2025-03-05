@@ -1,7 +1,7 @@
 var exec = require('cordova/exec');
 var cordova = require('cordova');
 
-const VERSION = '1.1.6';
+const VERSION = '2.0.0';
 
 const AdFormat = {
     BANNER: 'banner',
