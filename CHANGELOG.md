@@ -1,5 +1,11 @@
 ## Versions
 
+## 1.1.6
+    * Depends on Android SDK [v13.1.0](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_13_1_0) and iOS SDK [v13.1.0](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_13_1_0).
+    * Replace deprecated `Targeting Data` APIs with `Segment Targeting`.
+    * Remove deprecated `ConsentDialogState` APIs.
+    * Remove deprecated `isAgeRestrictedUser` APIs.
+    * Add a listener for `OnRewardedAdReceivedRewardEvent`.
 ## 1.1.5
     * Depends on Android SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_12_3_1) and iOS SDK [v12.3.1](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_12_3_1).
 ## 1.1.4

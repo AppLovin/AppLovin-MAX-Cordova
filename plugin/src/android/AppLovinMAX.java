@@ -2,11 +2,8 @@ package com.applovin.cordova;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.Gravity;
@@ -23,16 +20,16 @@ import com.applovin.mediation.MaxAdViewAdListener;
 import com.applovin.mediation.MaxError;
 import com.applovin.mediation.MaxReward;
 import com.applovin.mediation.MaxRewardedAdListener;
+import com.applovin.mediation.MaxSegment;
+import com.applovin.mediation.MaxSegmentCollection;
 import com.applovin.mediation.ads.MaxAdView;
 import com.applovin.mediation.ads.MaxInterstitialAd;
 import com.applovin.mediation.ads.MaxRewardedAd;
-import com.applovin.sdk.AppLovinAdContentRating;
-import com.applovin.sdk.AppLovinGender;
 import com.applovin.sdk.AppLovinMediationProvider;
 import com.applovin.sdk.AppLovinPrivacySettings;
 import com.applovin.sdk.AppLovinSdk;
 import com.applovin.sdk.AppLovinSdkConfiguration;
-import com.applovin.sdk.AppLovinSdkSettings;
+import com.applovin.sdk.AppLovinSdkInitializationConfiguration;
 import com.applovin.sdk.AppLovinSdkUtils;
 
 import org.apache.cordova.CallbackContext;
@@ -71,16 +68,8 @@ public class AppLovinMAX
     private AppLovinSdkConfiguration sdkConfiguration;
 
     // Store these values if pub attempts to set it before initializing
-    private String       userIdToSet;
-    private List<String> testDeviceAdvertisingIdsToSet;
-    private Boolean      verboseLoggingToSet;
-    private Integer      yearOfBirthToSet;
-    private Integer      genderToSet;
-    private Integer      maximumAdContentRatingToSet;
-    private String       emailToSet;
-    private String       phoneNumberToSet;
-    private List<String> keywordsToSet;
-    private List<String> interestsToSet;
+    private       List<String>                 testDeviceAdvertisingIdsToSet;
+    private final MaxSegmentCollection.Builder segmentCollectionBuilder = MaxSegmentCollection.builder();
 
     // Fullscreen Ad Fields
     private final Map<String, MaxInterstitialAd> mInterstitials = new HashMap<>( 2 );
@@ -101,6 +90,7 @@ public class AppLovinMAX
     public void initialize(final CordovaInterface cordova, final CordovaWebView webView)
     {
         super.initialize( cordova, webView );
+        sdk = AppLovinSdk.getInstance( cordova.getContext() );
     }
 
     private void initialize(final String pluginVersion, final String sdkKey, final CallbackContext callbackContext) throws JSONException
@@ -122,100 +112,22 @@ public class AppLovinMAX
 
         d( "Initializing AppLovin MAX Cordova v" + pluginVersion + "..." );
 
-        // If SDK key passed in is empty, check Android Manifest
-        String sdkKeyToUse = sdkKey;
         if ( TextUtils.isEmpty( sdkKey ) )
         {
-            try
-            {
-                PackageManager packageManager = context.getPackageManager();
-                String packageName = context.getPackageName();
-                ApplicationInfo applicationInfo = packageManager.getApplicationInfo( packageName, PackageManager.GET_META_DATA );
-                Bundle metaData = applicationInfo.metaData;
-
-                sdkKeyToUse = metaData.getString( "applovin.sdk.key", "" );
-            }
-            catch ( Throwable th )
-            {
-                e( "Unable to retrieve SDK key from Android Manifest: " + th );
-            }
-
-            if ( TextUtils.isEmpty( sdkKeyToUse ) )
-            {
-                throw new IllegalStateException( "Unable to initialize AppLovin SDK - no SDK key provided and not found in Android Manifest!" );
-            }
+            throw new IllegalStateException( "Unable to initialize AppLovin SDK - no SDK key provided!" );
         }
 
-        // Initialize SDK
-        sdk = AppLovinSdk.getInstance( sdkKeyToUse, new AppLovinSdkSettings( context ), currentActivity );
-        sdk.setPluginVersion( "Cordova-" + pluginVersion );
-        sdk.setMediationProvider( AppLovinMediationProvider.MAX );
-
-        // Set user id if needed
-        if ( !TextUtils.isEmpty( userIdToSet ) )
-        {
-            sdk.setUserIdentifier( userIdToSet );
-            userIdToSet = null;
-        }
-
-        // Set test device ids if needed
+        AppLovinSdkInitializationConfiguration.Builder initConfigBuidler = AppLovinSdkInitializationConfiguration.builder( sdkKey, context );
+        initConfigBuidler.setPluginVersion( "Cordova-" + pluginVersion );
+        initConfigBuidler.setMediationProvider( AppLovinMediationProvider.MAX );
+        initConfigBuidler.setSegmentCollection( segmentCollectionBuilder.build() );
         if ( testDeviceAdvertisingIdsToSet != null )
         {
-            sdk.getSettings().setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsToSet );
+            initConfigBuidler.setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsToSet );
             testDeviceAdvertisingIdsToSet = null;
         }
 
-        // Set verbose logging state if needed
-        if ( verboseLoggingToSet != null )
-        {
-            sdk.getSettings().setVerboseLogging( verboseLoggingToSet );
-            verboseLoggingToSet = null;
-        }
-
-        // Set targeting data if needed
-        if ( yearOfBirthToSet != null )
-        {
-            sdk.getTargetingData().setYearOfBirth( yearOfBirthToSet );
-            yearOfBirthToSet = null;
-        }
-
-        if ( genderToSet != null )
-        {
-            sdk.getTargetingData().setGender( integerToALGender( genderToSet ) );
-            genderToSet = null;
-        }
-
-        if ( maximumAdContentRatingToSet != null )
-        {
-            sdk.getTargetingData().setMaximumAdContentRating( integerToALAdContentRating( maximumAdContentRatingToSet ) );
-            maximumAdContentRatingToSet = null;
-        }
-
-        if ( emailToSet != null )
-        {
-            sdk.getTargetingData().setEmail( emailToSet );
-            emailToSet = null;
-        }
-
-        if ( phoneNumberToSet != null )
-        {
-            sdk.getTargetingData().setPhoneNumber( phoneNumberToSet );
-            phoneNumberToSet = null;
-        }
-
-        if ( keywordsToSet != null )
-        {
-            sdk.getTargetingData().setKeywords( keywordsToSet );
-            keywordsToSet = null;
-        }
-
-        if ( interestsToSet != null )
-        {
-            sdk.getTargetingData().setInterests( interestsToSet );
-            interestsToSet = null;
-        }
-
-        sdk.initializeSdk( configuration -> {
+        sdk.initialize( initConfigBuidler.build(), configuration -> {
             d( "SDK initialized" );
 
             sdkConfiguration = configuration;
@@ -235,16 +147,10 @@ public class AppLovinMAX
 
         if ( sdkConfiguration != null )
         {
-            message.put( "consentDialogState", sdkConfiguration.getConsentDialogState().ordinal() );
             message.put( "countryCode", sdkConfiguration.getCountryCode() );
-        }
-        else
-        {
-            message.put( "consentDialogState", AppLovinSdkConfiguration.ConsentDialogState.UNKNOWN.ordinal() );
         }
 
         message.put( "hasUserConsent", AppLovinPrivacySettings.hasUserConsent( context ) );
-        message.put( "isAgeRestrictedUser", AppLovinPrivacySettings.isAgeRestrictedUser( context ) );
         message.put( "isDoNotSell", AppLovinPrivacySettings.isDoNotSell( context ) );
         message.put( "isTablet", AppLovinSdkUtils.isTablet( context ) );
 
@@ -271,20 +177,6 @@ public class AppLovinMAX
         callbackContext.success();
     }
 
-    public void getConsentDialogState(final CallbackContext callbackContext)
-    {
-        if ( !isInitialized() )
-        {
-            PluginResult result = new PluginResult( OK, AppLovinSdkConfiguration.ConsentDialogState.UNKNOWN.ordinal() );
-            callbackContext.sendPluginResult( result );
-
-            return;
-        }
-
-        PluginResult result = new PluginResult( OK, sdkConfiguration.getConsentDialogState().ordinal() );
-        callbackContext.sendPluginResult( result );
-    }
-
     public void setHasUserConsent(final boolean hasUserConsent, final CallbackContext callbackContext)
     {
         AppLovinPrivacySettings.setHasUserConsent( hasUserConsent, getCurrentActivity() );
@@ -294,18 +186,6 @@ public class AppLovinMAX
     public void hasUserConsent(final CallbackContext callbackContext)
     {
         PluginResult result = new PluginResult( OK, AppLovinPrivacySettings.hasUserConsent( getCurrentActivity() ) );
-        callbackContext.sendPluginResult( result );
-    }
-
-    public void setIsAgeRestrictedUser(final boolean isAgeRestrictedUser, final CallbackContext callbackContext)
-    {
-        AppLovinPrivacySettings.setIsAgeRestrictedUser( isAgeRestrictedUser, getCurrentActivity() );
-        callbackContext.success();
-    }
-
-    public void isAgeRestrictedUser(final CallbackContext callbackContext)
-    {
-        PluginResult result = new PluginResult( OK, AppLovinPrivacySettings.isAgeRestrictedUser( getCurrentActivity() ) );
         callbackContext.sendPluginResult( result );
     }
 
@@ -323,178 +203,40 @@ public class AppLovinMAX
 
     public void setUserId(final String userId, final CallbackContext callbackContext)
     {
-        if ( isPluginInitialized )
-        {
-            sdk.setUserIdentifier( userId );
-            userIdToSet = null;
-        }
-        else
-        {
-            userIdToSet = userId;
-        }
-
+        sdk.getSettings().setUserIdentifier( userId );
         callbackContext.success();
     }
 
     public void setMuted(final boolean muted, final CallbackContext callbackContext)
     {
-        if ( !isPluginInitialized )
-        {
-            callbackContext.sendPluginResult( new PluginResult( ERROR ) );
-            return;
-        }
-
         sdk.getSettings().setMuted( muted );
-
         callbackContext.success();
     }
 
     public void setVerboseLogging(final boolean verboseLoggingEnabled, final CallbackContext callbackContext)
     {
-        if ( isPluginInitialized )
-        {
-            sdk.getSettings().setVerboseLogging( verboseLoggingEnabled );
-            verboseLoggingToSet = null;
-        }
-        else
-        {
-            verboseLoggingToSet = verboseLoggingEnabled;
-        }
-
+        sdk.getSettings().setVerboseLogging( verboseLoggingEnabled );
         callbackContext.success();
     }
 
     public void setTestDeviceAdvertisingIds(final List<String> advertisingIds, final CallbackContext callbackContext)
     {
-        if ( isPluginInitialized )
-        {
-            sdk.getSettings().setTestDeviceAdvertisingIds( advertisingIds );
-            testDeviceAdvertisingIdsToSet = null;
-        }
-        else
-        {
-            testDeviceAdvertisingIdsToSet = advertisingIds;
-        }
-
+        testDeviceAdvertisingIdsToSet = advertisingIds;
         callbackContext.success();
     }
 
-    // TARGETING DATA
+    // SEGMENT TARGETING
 
-    public void setYearOfBirth(final Integer yearOfBirth, final CallbackContext callbackContext)
+    public void addSegment(final int key, final List<Integer> values, final CallbackContext callbackContext)
     {
         if ( isPluginInitialized )
         {
-            sdk.getTargetingData().setYearOfBirth( yearOfBirth );
-            yearOfBirthToSet = null;
-        }
-        else
-        {
-            yearOfBirthToSet = yearOfBirth;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setGender(final Integer gender, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            integerToALGender( gender );
-            genderToSet = null;
-        }
-        else
-        {
-            genderToSet = gender;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setMaximumAdContentRating(final Integer maximumAdContentRating, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            integerToALAdContentRating( maximumAdContentRating );
-            genderToSet = null;
-        }
-        else
-        {
-            maximumAdContentRatingToSet = maximumAdContentRating;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setEmail(final String email, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            sdk.getTargetingData().setEmail( email );
-            emailToSet = null;
-        }
-        else
-        {
-            emailToSet = email;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setPhoneNumber(final String phoneNumber, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            sdk.getTargetingData().setPhoneNumber( phoneNumber );
-            phoneNumberToSet = null;
-        }
-        else
-        {
-            phoneNumberToSet = phoneNumber;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setKeywords(final List<String> keywords, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            sdk.getTargetingData().setKeywords( keywords );
-            keywordsToSet = null;
-        }
-        else
-        {
-            keywordsToSet = keywords;
-        }
-
-        callbackContext.success();
-    }
-
-    public void setInterests(final List<String> interests, final CallbackContext callbackContext)
-    {
-        if ( isPluginInitialized )
-        {
-            sdk.getTargetingData().setInterests( interests );
-            interestsToSet = null;
-        }
-        else
-        {
-            interestsToSet = interests;
-        }
-
-        callbackContext.success();
-    }
-
-    public void clearAllTargetingData(final CallbackContext callbackContext)
-    {
-        if ( sdk == null )
-        {
-            Log.e( "[" + TAG + "]", "Failed to clear targeting data - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!" );
+            Log.e( "[" + TAG + "]", "Segment must be added before calling 'AppLovinMAX.initialize(...);'" );
+            callbackContext.sendPluginResult( new PluginResult( ERROR ) );
             return;
         }
 
-        sdk.getTargetingData().clearAll();
+        segmentCollectionBuilder.addSegment( new MaxSegment( key, values ) );
 
         callbackContext.success();
     }
@@ -837,18 +579,6 @@ public class AppLovinMAX
         }
 
         fireWindowEvent( ( MaxAdFormat.MREC == adFormat ) ? "OnMRecAdCollapsedEvent" : "OnBannerAdCollapsedEvent", getAdInfo( ad ) );
-    }
-
-    @Override
-    public void onRewardedVideoCompleted(final MaxAd ad)
-    {
-        // This event is not forwarded
-    }
-
-    @Override
-    public void onRewardedVideoStarted(final MaxAd ad)
-    {
-        // This event is not forwarded
     }
 
     @Override
@@ -1374,46 +1104,6 @@ public class AppLovinMAX
         return adInfo;
     }
 
-    private static AppLovinGender integerToALGender(final Integer gender)
-    {
-        if ( gender == 1 )
-        {
-            return AppLovinGender.FEMALE;
-        }
-        else if ( gender == 2 )
-        {
-            return AppLovinGender.MALE;
-        }
-        else if ( gender == 3 )
-        {
-            return AppLovinGender.OTHER;
-        }
-        else
-        {
-            return AppLovinGender.UNKNOWN;
-        }
-    }
-
-    private static AppLovinAdContentRating integerToALAdContentRating(final Integer maximumAdContentRating)
-    {
-        if ( maximumAdContentRating == 1 )
-        {
-            return AppLovinAdContentRating.ALL_AUDIENCES;
-        }
-        else if ( maximumAdContentRating == 2 )
-        {
-            return AppLovinAdContentRating.EVERYONE_OVER_TWELVE;
-        }
-        else if ( maximumAdContentRating == 3 )
-        {
-            return AppLovinAdContentRating.MATURE_AUDIENCES;
-        }
-        else
-        {
-            return AppLovinAdContentRating.NONE;
-        }
-    }
-
     // React Native Bridge
 
     private void fireWindowEvent(final String name, final JSONObject params)
@@ -1434,10 +1124,6 @@ public class AppLovinMAX
         {
             showMediationDebugger( callbackContext );
         }
-        else if ( "getConsentDialogState".equalsIgnoreCase( action ) )
-        {
-            getConsentDialogState( callbackContext );
-        }
         else if ( "setHasUserConsent".equalsIgnoreCase( action ) )
         {
             boolean hasUserConsent = args.getBoolean( 0 );
@@ -1446,15 +1132,6 @@ public class AppLovinMAX
         else if ( "hasUserConsent".equalsIgnoreCase( action ) )
         {
             hasUserConsent( callbackContext );
-        }
-        else if ( "setIsAgeRestrictedUser".equalsIgnoreCase( action ) )
-        {
-            boolean isAgeRestrictedUser = args.getBoolean( 0 );
-            setIsAgeRestrictedUser( isAgeRestrictedUser, callbackContext );
-        }
-        else if ( "isAgeRestrictedUser".equalsIgnoreCase( action ) )
-        {
-            isAgeRestrictedUser( callbackContext );
         }
         else if ( "setDoNotSell".equalsIgnoreCase( action ) )
         {
@@ -1492,58 +1169,19 @@ public class AppLovinMAX
 
             setTestDeviceAdvertisingIds( testDeviceAdvertisingIdsList, callbackContext );
         }
-        else if ( "setYearOfBirth".equalsIgnoreCase( action ) )
+        else if ( "addSegment".equalsIgnoreCase( action ) )
         {
-            Integer yearOfBirth = args.getInt( 0 );
-            setYearOfBirth( yearOfBirth, callbackContext );
-        }
-        else if ( "setGender".equalsIgnoreCase( action ) )
-        {
-            Integer gender = args.getInt( 0 );
-            setGender( gender, callbackContext );
-        }
-        else if ( "setMaximumAdContentRating".equalsIgnoreCase( action ) )
-        {
-            Integer adContentRating = args.getInt( 0 );
-            setMaximumAdContentRating( adContentRating, callbackContext );
-        }
-        else if ( "setEmail".equalsIgnoreCase( action ) )
-        {
-            String email = args.getString( 0 );
-            setEmail( email, callbackContext );
-        }
-        else if ( "setPhoneNumber".equalsIgnoreCase( action ) )
-        {
-            String phoneNumber = args.getString( 0 );
-            setPhoneNumber( phoneNumber, callbackContext );
-        }
-        else if ( "setKeywords".equalsIgnoreCase( action ) )
-        {
-            JSONArray keywords = args.getJSONArray( 0 );
-            List<String> keywordsList = new ArrayList<>( keywords.length() );
+            int key = args.getInt( 0 );
 
-            for ( int i = 0; i < keywords.length(); i++ )
+            JSONArray segmentArray = args.getJSONArray( 1 );
+            List<Integer> segmentList = new ArrayList<>( segmentArray.length() );
+
+            for ( int i = 0; i < segmentArray.length(); i++ )
             {
-                keywordsList.add( keywords.getString( 0 ) );
+                segmentList.add( segmentArray.getInt( i ) );
             }
 
-            setKeywords( keywordsList, callbackContext );
-        }
-        else if ( "setInterests".equalsIgnoreCase( action ) )
-        {
-            JSONArray interests = args.getJSONArray( 0 );
-            List<String> interestsList = new ArrayList<>( interests.length() );
-
-            for ( int i = 0; i < interests.length(); i++ )
-            {
-                interestsList.add( interests.getString( 0 ) );
-            }
-
-            setInterests( interestsList, callbackContext );
-        }
-        else if ( "clearAllTargetingData".equalsIgnoreCase( action ) )
-        {
-            clearAllTargetingData( callbackContext );
+            addSegment( key, segmentList, callbackContext );
         }
         else if ( "trackEvent".equalsIgnoreCase( action ) )
         {

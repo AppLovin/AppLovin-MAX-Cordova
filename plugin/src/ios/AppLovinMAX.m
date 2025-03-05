@@ -37,16 +37,8 @@
 @property (nonatomic, strong) ALSdkConfiguration *sdkConfiguration;
 
 // Store these values if pub attempts to set it before initializing
-@property (nonatomic,   copy, nullable) NSString *userIdentifierToSet;
+@property (nonatomic, strong) MASegmentCollectionBuilder *segmentCollectionBuilder;
 @property (nonatomic, strong, nullable) NSArray<NSString *> *testDeviceIdentifiersToSet;
-@property (nonatomic, strong, nullable) NSNumber *verboseLoggingToSet;
-@property (nonatomic, strong, nullable) NSNumber *yearOfBirthToSet;
-@property (nonatomic, strong, nullable) NSNumber *genderToSet;
-@property (nonatomic, strong, nullable) NSNumber *contentRatingToSet;
-@property (nonatomic, strong, nullable) NSString *emailToSet;
-@property (nonatomic, strong, nullable) NSString *phoneNumberToSet;
-@property (nonatomic, strong, nullable) NSArray<NSString *> *keywordsToSet;
-@property (nonatomic, strong, nullable) NSArray<NSString *> *interestsToSet;
 
 // Fullscreen Ad Fields
 @property (nonatomic, strong) NSMutableDictionary<NSString *, MAInterstitialAd *> *interstitials;
@@ -70,6 +62,9 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)pluginInitialize
 {
     [super pluginInitialize];
+    
+    self.sdk = [ALSdk shared];
+    self.segmentCollectionBuilder = [MASegmentCollection builder];
     
     self.interstitials = [NSMutableDictionary dictionaryWithCapacity: 2];
     self.rewardedAds = [NSMutableDictionary dictionaryWithCapacity: 2];
@@ -110,48 +105,26 @@ static NSString *const TAG = @"AppLovinMAX";
     
     [self log: @"Initializing AppLovin MAX Cordova v%@...", pluginVersion];
     
-    // If SDK key passed in is empty, check Info.plist
     if ( ![sdkKey al_isValidString] )
     {
-        if ( [[NSBundle mainBundle].infoDictionary al_containsValueForKey: @"AppLovinSdkKey"] )
+        [NSException raise: NSInternalInconsistencyException
+                    format: @"Unable to initialize AppLovin SDK - no SDK key provided!"];
+    }
+    
+    ALSdkInitializationConfiguration *initConfig = [ALSdkInitializationConfiguration configurationWithSdkKey: sdkKey builderBlock:^(ALSdkInitializationConfigurationBuilder *builder) {
+        
+        builder.mediationProvider = ALMediationProviderMAX;
+        builder.pluginVersion = [@"Cordova-" stringByAppendingString: pluginVersion];
+        builder.segmentCollection = [self.segmentCollectionBuilder build];
+        if ( self.testDeviceIdentifiersToSet )
         {
-            sdkKey = [NSBundle mainBundle].infoDictionary[@"AppLovinSdkKey"];
+            builder.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
+            self.testDeviceIdentifiersToSet = nil;
         }
-        else
-        {
-            [NSException raise: NSInternalInconsistencyException
-                        format: @"Unable to initialize AppLovin SDK - no SDK key provided and not found in Info.plist!"];
-        }
-    }
+    }];
     
-    // Initialize SDK
-    self.sdk = [ALSdk sharedWithKey: sdkKey];
-    [self.sdk setPluginVersion: [@"Cordova-" stringByAppendingString: pluginVersion]];
-    [self.sdk setMediationProvider: ALMediationProviderMAX];
-    
-    // Set user id if needed
-    if ( [self.userIdentifierToSet al_isValidString] )
-    {
-        self.sdk.userIdentifier = self.userIdentifierToSet;
-        self.userIdentifierToSet = nil;
-    }
-    
-    // Set test device ids if needed
-    if ( self.testDeviceIdentifiersToSet )
-    {
-        self.sdk.settings.testDeviceAdvertisingIdentifiers = self.testDeviceIdentifiersToSet;
-        self.testDeviceIdentifiersToSet = nil;
-    }
-    
-    // Set verbose logging state if needed
-    if ( self.verboseLoggingToSet )
-    {
-        self.sdk.settings.verboseLoggingEnabled = self.verboseLoggingToSet.boolValue;
-        self.verboseLoggingToSet = nil;
-    }
-    
-    [self.sdk initializeSdkWithCompletionHandler:^(ALSdkConfiguration *configuration)
-     {
+    [self.sdk initializeWithConfiguration: initConfig completionHandler:^(ALSdkConfiguration *configuration) {
+        
         [self log: @"SDK initialized"];
         
         self.sdkConfiguration = configuration;
@@ -168,16 +141,10 @@ static NSString *const TAG = @"AppLovinMAX";
     
     if ( self.sdkConfiguration )
     {
-        message[@"consentDialogState"] = @(self.sdkConfiguration.consentDialogState);
         message[@"countryCode"] = self.sdkConfiguration.countryCode;
-    }
-    else
-    {
-        message[@"consentDialogState"] = @(ALConsentDialogStateUnknown);
     }
     
     message[@"hasUserConsent"] = @([ALPrivacySettings hasUserConsent]);
-    message[@"isAgeRestrictedUser"] = @([ALPrivacySettings isAgeRestrictedUser]);
     message[@"isDoNotSell"] = @([ALPrivacySettings isDoNotSell]);
     message[@"isTablet"] = @([self isTablet]);
     
@@ -206,22 +173,6 @@ static NSString *const TAG = @"AppLovinMAX";
     [self sendOKPluginResultForCommand: command];
 }
 
-- (void/*BOOL*/)getConsentDialogState:(CDVInvokedUrlCommand *)command
-{
-    if ( ![self isInitialized] )
-    {
-        CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_ERROR
-                                                 messageAsNSInteger: ALConsentDialogStateUnknown];
-        [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-        
-        return;
-    }
-    
-    CDVPluginResult *result = [CDVPluginResult resultWithStatus: CDVCommandStatus_OK
-                                             messageAsNSInteger: self.sdkConfiguration.consentDialogState];
-    [self.commandDelegate sendPluginResult: result callbackId: command.callbackId];
-}
-
 - (void)setHasUserConsent:(CDVInvokedUrlCommand *)command
 {
     BOOL hasUserConsent = ((NSNumber *)[command argumentAtIndex: 0]).boolValue;
@@ -233,19 +184,6 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void/*BOOL*/)hasUserConsent:(CDVInvokedUrlCommand *)command
 {
     [self sendOKPluginResultForCommand: command withBool: [ALPrivacySettings hasUserConsent]];
-}
-
-- (void)setIsAgeRestrictedUser:(CDVInvokedUrlCommand *)command
-{
-    BOOL isAgeRestrictedUser = ((NSNumber *)[command argumentAtIndex: 0]).boolValue;
-    [ALPrivacySettings setIsAgeRestrictedUser: isAgeRestrictedUser];
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void/*BOOL*/)isAgeRestrictedUser:(CDVInvokedUrlCommand *)command
-{
-    [self sendOKPluginResultForCommand: command withBool: [ALPrivacySettings isAgeRestrictedUser]];
 }
 
 - (void)setDoNotSell:(CDVInvokedUrlCommand *)command
@@ -264,28 +202,13 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setUserId:(CDVInvokedUrlCommand *)command
 {
     NSString *userId = [command argumentAtIndex: 0];
-    
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.userIdentifier = userId;
-        self.userIdentifierToSet = nil;
-    }
-    else
-    {
-        self.userIdentifierToSet = userId;
-    }
+    self.sdk.settings.userIdentifier = userId;
     
     [self sendOKPluginResultForCommand: command];
 }
 
 - (void)setMuted:(CDVInvokedUrlCommand *)command
 {
-    if ( ![self isPluginInitialized] )
-    {
-        [self sendErrorPluginResultForCommand: command];
-        return;
-    }
-    
     BOOL muted = ((NSNumber *)[command argumentAtIndex: 0]).boolValue;
     self.sdk.settings.muted = muted;
     
@@ -295,16 +218,7 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setVerboseLogging:(CDVInvokedUrlCommand *)command
 {
     BOOL enabled = ((NSNumber *)[command argumentAtIndex: 0]).boolValue;
-    
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.settings.verboseLoggingEnabled = enabled;
-        self.verboseLoggingToSet = nil;
-    }
-    else
-    {
-        self.verboseLoggingToSet = @(enabled);
-    }
+    self.sdk.settings.verboseLoggingEnabled = enabled;
     
     [self sendOKPluginResultForCommand: command];
 }
@@ -312,150 +226,27 @@ static NSString *const TAG = @"AppLovinMAX";
 - (void)setTestDeviceAdvertisingIds:(CDVInvokedUrlCommand *)command
 {
     NSArray<NSString *> *testDeviceAdvertisingIds = [command argumentAtIndex: 0];
-    
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.settings.testDeviceAdvertisingIdentifiers = testDeviceAdvertisingIds;
-        self.testDeviceIdentifiersToSet = nil;
-    }
-    else
-    {
-        self.testDeviceIdentifiersToSet = testDeviceAdvertisingIds;
-    }
+    self.testDeviceIdentifiersToSet = testDeviceAdvertisingIds;
     
     [self sendOKPluginResultForCommand: command];
 }
 
-- (void)setYearOfBirth:(CDVInvokedUrlCommand *)command
-{
-    NSNumber *yearOfBirth = [command argumentAtIndex: 0];
+#pragma mark - Segment Targeting
 
+- (void)addSegment:(CDVInvokedUrlCommand *)command
+{
     if ( [self isPluginInitialized] )
     {
-        self.sdk.targetingData.yearOfBirth = yearOfBirth;
-        self.yearOfBirthToSet = nil;
-    }
-    else
-    {
-        self.yearOfBirthToSet = yearOfBirth;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setGender:(CDVInvokedUrlCommand *)command
-{
-    NSNumber *gender = [command argumentAtIndex: 0];
-
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.gender = [gender intValue];
-        self.genderToSet = nil;
-    }
-    else
-    {
-        self.genderToSet = gender;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setMaximumAdContentRating:(CDVInvokedUrlCommand *)command
-{
-    NSNumber *contentRating = [command argumentAtIndex: 0];
-
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.maximumAdContentRating = [contentRating intValue];
-        self.contentRatingToSet = nil;
-    }
-    else
-    {
-        self.contentRatingToSet = contentRating;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setEmail:(CDVInvokedUrlCommand *)command
-{
-    NSString *email = [command argumentAtIndex: 0];
-
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.email = email;
-        self.emailToSet = nil;
-    }
-    else
-    {
-        self.emailToSet = email;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setPhoneNumber:(CDVInvokedUrlCommand *)command
-{
-    NSString *phoneNumber = [command argumentAtIndex: 0];
-
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.phoneNumber = phoneNumber;
-        self.phoneNumberToSet = nil;
-    }
-    else
-    {
-        self.phoneNumberToSet = phoneNumber;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setKeywords:(CDVInvokedUrlCommand *)command
-{
-    NSArray<NSString *> *keywords = [command argumentAtIndex: 0];
-    
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.keywords = keywords;
-        self.keywordsToSet = nil;
-    }
-    else
-    {
-        self.keywordsToSet = keywords;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)setInterests:(CDVInvokedUrlCommand *)command
-{
-    NSArray<NSString *> *interests = [command argumentAtIndex: 0];
-    
-    if ( [self isPluginInitialized] )
-    {
-        self.sdk.targetingData.interests = interests;
-        self.interestsToSet = nil;
-    }
-    else
-    {
-        self.interestsToSet = interests;
-    }
-    
-    [self sendOKPluginResultForCommand: command];
-}
-
-- (void)clearAllTargetingData:(CDVInvokedUrlCommand *)command
-{
-    if ( !_sdk )
-    {
-        [self log: @"Failed to clear targeting data - please ensure the AppLovin MAX Cordova Plugin has been initialized by calling 'AppLovinMAX.initialize(...);'!"];
+        [self log: @"Segment must be added before calling 'AppLovinMAX.initialize(...);'"];
         [self sendErrorPluginResultForCommand: command];
-        
         return;
     }
     
-    [self.sdk.targetingData clearAll];
+    NSNumber *key = [command argumentAtIndex: 0];
+    NSArray<NSNumber *> *values = [command argumentAtIndex: 1];
+    
+    MASegment *segment = [[MASegment alloc] initWithKey: key values: values];
+    [self.segmentCollectionBuilder addSegment: segment];
     
     [self sendOKPluginResultForCommand: command];
 }
