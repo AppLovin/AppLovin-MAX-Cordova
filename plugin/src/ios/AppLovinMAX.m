@@ -245,7 +245,8 @@ static NSString *const TAG = @"AppLovinMAX";
     NSNumber *key = [command argumentAtIndex: 0];
     NSArray<NSNumber *> *values = [command argumentAtIndex: 1];
     
-    [self.segmentCollectionBuilder addSegment: [[MASegment alloc] initWithKey: key values: values]];
+    MASegment *segment = [[MASegment alloc] initWithKey: key values: values];
+    [self.segmentCollectionBuilder addSegment: segment];
     
     [self sendOKPluginResultForCommand: command];
 }
