@@ -1,6 +1,7 @@
 ## Versions
 
 ## 2.1.0
+    * Depends on Android SDK [v13.2.0](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_13_2_0) and iOS SDK [v13.2.0](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_13_2_0).
 ## 2.0.0
     * Depends on Android SDK [v13.1.0](https://github.com/AppLovin/AppLovin-MAX-SDK-Android/releases/tag/release_13_1_0) and iOS SDK [v13.1.0](https://github.com/AppLovin/AppLovin-MAX-SDK-iOS/releases/tag/release_13_1_0).
     * Replace deprecated `Targeting Data` APIs with `Segment Targeting`.
