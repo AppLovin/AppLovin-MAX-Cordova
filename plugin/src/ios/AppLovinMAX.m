@@ -281,15 +281,15 @@ static NSString *const TAG = @"AppLovinMAX";
 
 - (void)setBannerPlacement:(CDVInvokedUrlCommand *)command
 {
-    NSString *placement = [command argumentAtIndex: 0];
-    NSString *adUnitIdentifier = [command argumentAtIndex: 1];
+    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
+    NSString *placement = [command argumentAtIndex: 1];
     [self setAdViewPlacement: placement forAdUnitIdentifier: adUnitIdentifier adFormat: DEVICE_SPECIFIC_ADVIEW_AD_FORMAT command: command];
 }
 
 - (void)updateBannerPosition:(CDVInvokedUrlCommand *)command
 {
-    NSString *bannerPosition = [command argumentAtIndex: 0];
-    NSString *adUnitIdentifier = [command argumentAtIndex: 1];
+    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
+    NSString *bannerPosition = [command argumentAtIndex: 1];
     [self updateAdViewPosition: bannerPosition forAdUnitIdentifier: adUnitIdentifier adFormat: DEVICE_SPECIFIC_ADVIEW_AD_FORMAT command: command];
 }
 
@@ -330,15 +330,15 @@ static NSString *const TAG = @"AppLovinMAX";
 
 - (void)setMRecPlacement:(CDVInvokedUrlCommand *)command
 {
-    NSString *placement = [command argumentAtIndex: 0];
-    NSString *adUnitIdentifier = [command argumentAtIndex: 1];
+    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
+    NSString *placement = [command argumentAtIndex: 1];
     [self setAdViewPlacement: placement forAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.mrec command: command];
 }
 
 - (void)updateMRecPosition:(CDVInvokedUrlCommand *)command
 {
-    NSString *mrecPosition = [command argumentAtIndex: 0];
-    NSString *adUnitIdentifier = [command argumentAtIndex: 1];
+    NSString *adUnitIdentifier = [command argumentAtIndex: 0];
+    NSString *mrecPosition = [command argumentAtIndex: 1];
     [self updateAdViewPosition: mrecPosition forAdUnitIdentifier: adUnitIdentifier adFormat: MAAdFormat.mrec command: command];
 }
 
